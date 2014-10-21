@@ -1,6 +1,6 @@
 '''
-This code works for quarter_note_run.png, using note2.png as a the note template
-and treble.png as the treble template
+This code works for images/quarter_note_run.png, using images/note2.png as a the note template
+and images/treble.png as the treble template
 
 Currently only works for a single bar, because it depends on y positions
 '''
@@ -135,7 +135,7 @@ def read_quarter_notes(im_name, note_name, treble_name):
 	top_left = (0,0)
 
 	if treble_name != "":
-		treble = cv2.imread('treble_clef.png',0)
+		treble = cv2.imread('images/treble_clef.png',0)
 		w2, h2 = treble.shape[::-1]
 		top_left = find_treble_clef(img,treble)
 
@@ -202,8 +202,8 @@ def read_quarter_notes(im_name, note_name, treble_name):
 Run code
 '''
 if __name__ == '__main__':
-	im_name = 'quarter_note_run.png'
-	note_name = 'note2.png'
-	treble_name = 'treble_clef.png'
+	im_name = 'images/quarter_note_run.png'
+	note_name = 'images/note2.png'
+	treble_name = 'images/treble_clef.png'
 	
 	print read_quarter_notes(im_name, note_name, treble_name)
