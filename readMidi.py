@@ -52,12 +52,12 @@ def read(midiFile):
 
 def toNoteName(pitch):
 	''' Convert from pitch number to note name
-		INPUTS: pitch (integer, 0-127 -> C5, middle C, is 60)
+		INPUTS: pitch (integer, 0-127 -> C4, middle C, is 60)
 		OUTPUTS: note name (eg C5, D#4, B7)
 	'''
 	names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 	name = names[pitch%12]
-	octave = int(pitch/12)
+	octave = int(pitch/12)-1
 	return name + str(octave)
 
 

@@ -73,8 +73,8 @@ def find_slots(lines):
 	assert(len(lines)==5)
 	lines.sort() # starting at the top
 	note_slots = {}
-	line_notes = ['F1','D','B','G','E1']
-	space_notes = ['E','C','A','F']
+	line_notes = ['F5','D5','B4','G4','E4']
+	space_notes = ['E5','C5','A4','F4']
 	count = 0
 
 	# find average space between each line 
