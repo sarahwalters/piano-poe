@@ -7,25 +7,19 @@ For use with the Adafruit Motor Shield v2
 ---->	http://www.adafruit.com/products/1438
 */
 
-//#include <Wire.h>
-//#include <Adafruit_MotorShield.h>
-//#include "utility/Adafruit_PWMServoDriver.h"
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_PWMServoDriver.h"
 
-//Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
-//Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_DCMotor *cMotor = AFMS.getMotor(1);
 
 String incomingString = "";
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
 
-  //AFMS.begin();  // create with the default frequency 1.6KHz
- 
-  // Set the speed to start, from 0 (off) to 255 (max speed)
-  //myMotor->setSpeed(150);
-  //myMotor->run(FORWARD);
-  // turn on motor
- // myMotor->run(RELEASE);
+  AFMS.begin();  // create with the default frequency 1.6KHz
 }
 
 void loop() {
@@ -43,28 +37,21 @@ void loop() {
       Serial.println ("startTime = " + startTime);
       Serial.println ("duration  = " + duration);
       Serial.println ("note = " + note);
+      
+      if (note == "C4"){
+        runCMotor();
+      }
     
       incomingString = "";
     } else {
       incomingString = incomingString + char(incoming);
     }
   }
-  
- 
-  
-//  byte i;
-//
-//  myMotor->run(FORWARD);
-//  for (i=0; i<255; i++) {
-//    myMotor->setSpeed(i);  
-//    delay(10);
-//  }
-//  for (i=255; i!=0; i--) {
-//    myMotor->setSpeed(i);  
-//    delay(10);
-//  }
-//  
-//  Serial.print("tech");
-//  myMotor->run(RELEASE);
-//  delay(1000);
 }
+
+  void runCMotor()
+    {  
+    cMotor->run(FORWARD);
+    cMotor->setSpeed(75);  
+    delay(500); 
+  }
