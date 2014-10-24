@@ -9,4 +9,4 @@ TO USE python-midi:
 
 * sudo apt-get install libasound2-dev
 
-* sudo python setup.py install
+* cd to python-midi, then sudo python setup.py install
