@@ -39,24 +39,18 @@ void loop() {
       Serial.println ("duration  = " + duration);
       Serial.println ("note = " + note);
       
-      if (note == "E5"){
-        G4Motor->setSpeed(0);
+      if (note == "E5") {
+        //G4Motor->setSpeed(0);
         runE5Motor();
-        delay (duration);
+        delay (500);
         incomingString = "";
        
       }
-//      else if (note == "G4"}{
-//        E5Motor->setSpeed(0);
-//        runG4Motor();
-//        delay(duration);
-//        incomingString = "";
-//      }
-     else{
-      incomingString = "";
+      else {
+        incomingString = "";
+      }    
     }
     else {
-      
       incomingString = incomingString + char(incoming);
     }
   }
