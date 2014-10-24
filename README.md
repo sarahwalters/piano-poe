@@ -9,9 +9,10 @@ TO USE python-midi:
 
 * sudo apt-get install libasound2-dev
 
-* sudo python setup.py install
+* cd to python-midi, then sudo python setup.py install
 
+* sudo python setup.py install
 
 TO INSTALL OPENCV:
 
-* Follow this link: https://help.ubuntu.com/community/OpenCV
+* Follow the instructions on this link: https://help.ubuntu.com/community/OpenCV
