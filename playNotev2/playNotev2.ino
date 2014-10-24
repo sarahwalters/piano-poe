@@ -12,7 +12,7 @@ For use with the Adafruit Motor Shield v2
 #include "utility/Adafruit_PWMServoDriver.h"
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
-Adafruit_DCMotor *E5Motor = AFMS.getMotor(1);
+Adafruit_DCMotor *E4Motor = AFMS.getMotor(1);
 //Adafruit_DCMotor *G4Motor = AFMS.getMotor(3);
 
 String incomingString = "";
@@ -39,9 +39,9 @@ void loop() {
       Serial.println ("duration  = " + duration);
       Serial.println ("note = " + note);
       
-      if (note == "E5") {
+      if (note == "E4") {
         //G4Motor->setSpeed(0);
-        runE5Motor();
+        runE4Motor();
         delay (500);
         incomingString = "";
        
@@ -56,10 +56,10 @@ void loop() {
   }
 }
 
-  void runE5Motor()
+  void runE4Motor()
     {  
-    E5Motor->run(FORWARD);
-    E5Motor->setSpeed(75);  
+    E4Motor->run(FORWARD);
+    E4Motor->setSpeed(75);  
     delay(500); 
   }
   
