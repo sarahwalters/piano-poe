@@ -13,3 +13,4 @@ def formatMidiOutput(ser):
 		print out
 		ser.write(out)
 		ser.write('*')
+	ser.write('!')
