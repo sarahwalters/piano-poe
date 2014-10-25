@@ -44,8 +44,8 @@ void loop() {
     while (incomingString != "!") {
       // get single note from incomingString
       int starIndex = incomingString.indexOf("*");
-      incomingString = incomingString.substring(starIndex+1);
       String noteStr = incomingString.substring(0, starIndex);
+      incomingString = incomingString.substring(starIndex+1);
       Serial.println(noteStr);
       
       // parse single note

@@ -1,5 +1,6 @@
 import serial
 import readMidi
+import time
 
 def serialWrapper():
 	ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
