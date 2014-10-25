@@ -1,5 +1,6 @@
 import serial
 import readMidi
+import time
 
 def serialWrapper():
 	ser1 = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
@@ -21,6 +22,7 @@ def formatMidiOutput(ser):
 	midiOutput = readMidi.read('midis/mary.mid')
 	#midiOutput = test
 	for item in midiOutput:
+
 		if (item[1] == 'C4' or 'D4' or 'E4' or 'F4')
 			out1 = str(item[0]) + ',' + '25,' + item[1]
 			print out1
@@ -31,3 +33,6 @@ def formatMidiOutput(ser):
 			print out2
 			ser2.write(out)
 			ser2.write('*')
+	ser1.write('!')
+	ser2.write('!')
+
