@@ -9,8 +9,15 @@ TO USE python-midi:
 
 * sudo apt-get install libasound2-dev
 
+* cd to python-midi, then sudo python setup.py install
+
 * sudo python setup.py install
 
 TO USE playNotev2:
 - download Adafruit Library from https://learn.adafruit.com/adafruit-motor-shield-v2-for-arduino/install-software
 -save in /usr/share/arduino/libraries
+
+TO INSTALL OPENCV:
+
+* Follow the instructions on this link: https://help.ubuntu.com/community/OpenCV
+
