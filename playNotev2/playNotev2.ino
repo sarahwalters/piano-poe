@@ -8,64 +8,68 @@ For use with the Adafruit Motor Shield v2
 */
 
 #include <Wire.h>
+#include <Note.h>
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_PWMServoDriver.h"
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_DCMotor *E4Motor = AFMS.getMotor(1);
-//Adafruit_DCMotor *G4Motor = AFMS.getMotor(3);
+Adafruit_DCMotor *G4Motor = AFMS.getMotor(3);
+
+//Note test = Note(1, 2, 'E', 3);
+//Note another = Note(10, 20, 'F', 5);
+//Note notes[100];
 
 String incomingString = "";
+String state = "reading";
 
 void setup() {
-  Serial.begin(9600);           // set up Serial library at 9600 bps
-
-  AFMS.begin();  // create with the default frequency 1.6KHz
+  Serial.begin(9600); // set up Serial library at 9600 bps
+  AFMS.begin(); // create with the default frequency 1.6KHz
 }
 
 void loop() {
-  if (Serial.available() >0) {
-  //recieve information from pyserial
+  if (state == "reading" && Serial.available() > 0) {
+    // append new info to incomingString
     int incoming = Serial.read();
-    if (incoming == 42) {
-      Serial.println ("incomingString = " + incomingString);
-      int commaIndex = incomingString.indexOf(",");
-      int commaIndex2 = incomingString.indexOf(",", commaIndex+1);
+    incomingString = incomingString + char(incoming);
     
-      String startTime = incomingString.substring(0,commaIndex);
-      String duration = incomingString.substring (commaIndex+1, commaIndex2);
-      String note = incomingString.substring (commaIndex2+1);
-      Serial.println ("startTime = " + startTime);
-      Serial.println ("duration  = " + duration);
-      Serial.println ("note = " + note);
-      
-      if (note == "E4") {
-        //G4Motor->setSpeed(0);
-        runE4Motor();
-        delay (500);
-        incomingString = "";
-       
-      }
-      else {
-        incomingString = "";
-      }    
+    // received ! (end signal) yet?
+    if (incoming == 33) {
+      state = "processing"; // switch states
+      Serial.println("Done");
     }
-    else {
-      incomingString = incomingString + char(incoming);
+  } else if (state == "processing") {
+    // split info into individual notes
+    while (incomingString != "!") {
+      // get single note from incomingString
+      int starIndex = incomingString.indexOf("*");
+      String noteStr = incomingString.substring(0, starIndex);
+      incomingString = incomingString.substring(starIndex+1);
+      Serial.println(noteStr);
+      
+      // parse single note
+//      int commaIndex1 = noteStr.indexOf(",");
+//      int commaIndex2 = noteStr.indexOf(",", commaIndex1 + 1);
+//      String startTime = noteStr.substring(0,commaIndex1);
+//      String duration = noteStr.substring (commaIndex1+1, commaIndex2);
+//      String nameAndOctave = noteStr.substring (commaIndex2+1);
+//      Serial.println(nameAndOctave);
     }
   }
 }
 
-  void runE4Motor()
-    {  
-    E4Motor->run(FORWARD);
-    E4Motor->setSpeed(75);  
-    delay(500); 
+void play(String note) {
+  if (note=="E4") {
+    runMotor(E4Motor);
+  } else if (note == "G4") {
+    runMotor(G4Motor);
   }
-  
-//    void runG4Motor()
-//    {  
-//    G4Motor->run(FORWARD);
-//    G4Motor->setSpeed(75);  
-//    delay(500); 
-//  }
+}
+
+void runMotor(Adafruit_DCMotor *motor) {
+  motor->run(FORWARD);
+  motor->setSpeed(75);
+  delay(500);
+  motor->setSpeed(0);
+}
