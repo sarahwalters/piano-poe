@@ -14,5 +14,4 @@ def formatMidiOutput(ser):
 		print out
 		ser.write(out)
 		ser.write('*')
-		time.sleep(0.1)
 	ser.write('!')
