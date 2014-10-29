@@ -15,6 +15,7 @@ Installing python-midi:
 * sudo python setup.py install
 
 Compiling playNotev2.ino:
+
 -> Adafruit motor shield library:
 * Download Adafruit Library from https://learn.adafruit.com/adafruit-motor-shield-v2-for-arduino/install-software
 * Save files in arduino/libraries/Adafruit_Motorshield
