@@ -75,11 +75,11 @@ void loop() {
       //state = 2;
       break;
     case 2:
+      /*
       if (qList.count() != 0) {
         Serial.println(qList.count());
       }
       
-      /*
       while (!qList.isEmpty()) {
         Note top = qList.pop();
         Serial.println(String(top.getName()));
