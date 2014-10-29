@@ -1,38 +1,61 @@
 import serial
 import readMidi
-import time
 
+
+''' handles opening/closing serial ports & calling method
+	which gets midi contents and sends them to Arduino 
+'''
 def serialWrapper():
-	ser1 = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-	ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
-	formatMidiOutput(ser)
-	ser.close()
+	# open all serial connections
+	ser0 = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+	# ser1 = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
+	sers = [ser0]
 
-def formatMidiOutput(ser):
+	# define notes each serial connection handles
+	noteSet0 = ['E3','G3','C4','D4','E4','G4'] # ser0 handles all notes in test midi
+	# noteSet1 = []
+	noteSets = [noteSet0]
 
-	test = 		[[0, 'E5', 72],
-		 [0, 'G4', 70],
-		 [25, 'D5', 72],
-		 [50, 'C5', 71],
-		 [75, 'D5', 79],
-		 [100, 'E5', 85],
-		 [100, 'G4', 79],
-		 [125, 'E5', 78],
-		 [150, 'E5', 74]]
-	midiOutput = readMidi.read('midis/mary.mid')
-	#midiOutput = test
+	# map note nameAndOctave to serial connection
+	serMap = {}
+	numArduinos = len(sers)
+	for i in range(numArduinos):
+		noteSet = noteSets[i]
+		ser = sers[i]
+		for note in noteSet:
+			serMap[note] = ser
+
+	# write midi output to serial
+	sendMidiOutput(serMap)
+
+	# close all serial connections
+	for ser in sers:
+		ser.write('!') # end character - done sending midi output
+		ser.close()
+
+
+''' gets midi contents and sends them to Arduino according to
+	serMap (key: note name, value: open serial connection)
+'''
+def sendMidiOutput(serMap):
+	testMidiOutput = [[0, 'E4', 72],
+					  [0, 'G3', 70],
+					  [25, 'D4', 72],
+					  [50, 'C4', 71],
+					  [75, 'D4', 79],
+					  [100, 'E4', 85],
+					  [100, 'G3', 79],
+					  [125, 'E4', 78],
+					  [150, 'E4', 74]]
+
+	# if python-midi isn't installed, use testMidiOutput as midiOutput
+	midiOutput = testMidiOutput
+	#midiOutput = readMidi.read('midis/mary.mid')
+	
 	for item in midiOutput:
+		start = item[0]
+		nameAndOctave = item[1]
+		out = str(start) + ',25,'+str(nameAndOctave) + '*'
+		print out
 
-		if (item[1] == 'C4' or 'D4' or 'E4' or 'F4')
-			out1 = str(item[0]) + ',' + '25,' + item[1]
-			print out1
-			ser1.write(out1)
-			ser1.write('*')
-		else
-			out2 = str(item[0]) + ',' + '25,' + item[1]
-			print out2
-			ser2.write(out)
-			ser2.write('*')
-	ser1.write('!')
-	ser2.write('!')
-
+		serMap[nameAndOctave].write(out)
