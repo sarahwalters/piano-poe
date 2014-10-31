@@ -34,3 +34,6 @@ Compiling playNotev2.ino:
 Installing OpenCV:
 * Follow the instructions on this link: https://help.ubuntu.com/community/OpenCV
 
+->Installing ImageMagick:
+*sudo apt-get install imagemagick
+* to check if it installed properly: identify -version

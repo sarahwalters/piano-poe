@@ -1,105 +1,94 @@
 import cv2
 import numpy as np
 
-
-
-def mean_shift(hypothesis, keypoints, threshold):
+def findScale(image):
     """
-    Inputs:
-        hypothesis -> Previous center point as a starting hypothesis
-        keypoints -> List of keypoint (x,y) coordinates
-        Threshold -> maximum acceptable difference in center between iterations (eg 10 pixels, 5 pixels)
-        current -> np array representing the image (for visualization)
-        show -> determines whether visualization is shown
+    finds the scale of an image based on the staff; also removes the staff
 
-    Returns:
-        New center of keypoints
-        Radius
-        If show is true -> displays the center, keypoints and a circle around the object
+    inputs:
+        image - unprocesesed image with scale 
+
+    returns:
+        unbarred - image without bars or cleff in it
+        bar position - a list of pixel values for the rows containing bars
+        scale - the scale based on the average distance between bars
     """
 
-    n=0
-    if len(keypoints) > 1:
+    pass
 
-        #assigns a value to the weighting constant -> based on 
-        #experimental results on cropped cookie_00274
-        c = 0.0001
+def isolateNotes(image):
+    """
+    Isolates each note in an image into a seperate numpy array and stores them in a list
 
-        #arbitrarily set diff high to go through loop at least once
-        diff = 1000
+    inputs:
+        image - the image (with bars and cleff removed)
 
-        while(diff > threshold):
-            #sets up lists of weights and weights*position
-            x_weights = []
-            y_weights = []
-            weighted_x = []
-            weighted_y = []
-            #Creats a list of weighted points, where points near the 
-            #hypothesis have a larger weight
-            last_guess = hypothesis
-            for kp in keypoints:
-                x_val = np.exp(-c * (kp[0] - last_guess[0])**2)
-                x_weights.append(x_val)
-                weighted_x.append(x_val*kp[0])
-                y_val = np.exp(-c * (kp[1] - last_guess[1])**2)
-                y_weights.append(y_val)
-                weighted_y.append(y_val*kp[1])
+    returns:
+        notes - a list of numpy arrays representing isolated notes 
+    """
+    pass
 
-            #finds 'center of mass' of the points to determine new center
-            x = int(sum(weighted_x)/sum(x_weights))
-            y = int(sum(weighted_y)/sum(y_weights))
+def templateMatch(scale, note):
+    """
+        Takes in a scale and a music note, matches it to a template to determine the type of the note
+    """
+    res = cv2.matchTemplate(img,template,method)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
-            #update hypothesis
-            hypothesis = (x,y)
+    threshold = 27000000 # need a way to determine this not by hand through guess and check
+    loc = np.where(res <= threshold)
 
-            #difference between the current and last guess
-            diff = np.sqrt((last_guess[0] - x)**2 + (last_guess[1] - y)**2)
-            return hypothesis
+def meanShift(points, hypothesis, threshold):
+    """
+    returns: 
+        The center of a group of inputted points
 
+    inputs:
+        points - list of [x,y] objects
+        hypothesis - guess of where the center would be (center of image is good start)
+        threshold - maximum acceptable difference in center guess between iterations
+    """
+    c = 0.0001
 
+    #arbitrarily set diff high to go through loop at least once
+    diff = 1000
 
-t_im = cv2.imread('images/note4.png')
-q_im = cv2.imread('images/singleOctaveTemplate.png')
+    while(diff > threshold):
+        #sets up lists of weights and weights*position
+        x_weights = []
+        y_weights = []
+        weighted_x = []
+        weighted_y = []
+        #Creats a list of weighted points, where points near the 
+        #hypothesis have a larger weight
+        last_guess = hypothesis
+        for pt in points:
+            x_val = np.exp(-c * (pt[0] - last_guess[0])**2)
+            x_weights.append(x_val)
+            weighted_x.append(x_val*kp[0])
+            y_val = np.exp(-c * (pt[1] - last_guess[1])**2)
+            y_weights.append(y_val)
+            weighted_y.append(y_val*kp[1])
 
-method = 'SIFT'
-#finding keypoints and descriptors in the training image
-detector = cv2.FeatureDetector_create(method)
-descriptor = cv2.DescriptorExtractor_create(method)     
-t_k = detector.detect(t_im)
-t_k, t_d = descriptor.compute(t_im, t_k)
+        #finds 'center of mass' of the points to determine new center
+        x = int(sum(weighted_x)/sum(x_weights))
+        y = int(sum(weighted_y)/sum(y_weights))
 
-#find all keypoints and descriptors in the query image
-q_k = detector.detect(q_im)
-q_k, q_d = descriptor.compute(q_im, q_k)
+        #update hypothesis
+        hypothesis = (x,y)
 
+        #difference between the current and last guess
+        diff = np.sqrt((last_guess[0] - x)**2 + (last_guess[1] - y)**2)
+    return hypothesis
 
-#saving keypoint coordinates in a list because keypoint objects can't be pickled
-kps =[]
-for point in t_k:
-    kps.append((point.pt[0], point.pt[1]))
-    cv2.circle(t_im, (int(point.pt[0]), int(point.pt[1])), 2, (0, 0, 255), 3)
+def processNotes(notes):
+    """
+    Process notes to extract note name, note type, and start time (may also put into queues based on note name)
 
-matcher = cv2.BFMatcher() #(normType = cv2.NORM_HAMMING)
+    inputs:
+        notes - list of numpy arrays representing isolated notes in order of appearence
 
-#match list of object keypoints to query image, not other way around
-matches = matcher.knnMatch(t_d, q_d, k = 2)
-
-#Nearest neighbor test to reduce false matches
-good_matches = []
-for m,n in matches:
-    # if m.distance < 0.75*n.distance:
-    # Get coordinate of the match
-    m_x = int(q_k[m.trainIdx].pt[0])
-    m_y = int(q_k[m.trainIdx].pt[1])
-    good_matches.append((m_x, m_y))
-    cv2.circle(q_im, (int(m_x), int(m_y)), 2, (0, 0, 255), 3)
-
-
-h = mean_shift([300, 100], good_matches, 0.001)
-cv2.circle(q_im, h, 2, (255, 0, 0), 3)
-cv2.imshow('show', q_im)
-cv2.waitKey(0)
-
-
-
-
+    returns:
+        list of [note name, note type, start time]
+    """
+    pass
