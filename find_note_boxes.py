@@ -10,6 +10,8 @@ PARTIAL_NOTE = 2
 STEM = 3
 UNKNOWN = 4
 
+bypass_clef = 120
+
 def read_staff_lines(img):
 	edges = cv2.Canny(img,150,700)
 
@@ -49,8 +51,8 @@ def find_notes(im_name):
 	lines.sort()
 	print lines
 
-	#space_between = int(np.mean([lines[1]-lines[0], lines[2]-lines[1], lines[3]-lines[2],lines[4]-lines[3]]))
-	space_between = 28
+	space_between = int(np.mean([lines[1]-lines[0], lines[2]-lines[1], lines[3]-lines[2],lines[4]-lines[3]]))
+	#space_between = 28
 
 	descriptors = {}
 
@@ -60,7 +62,7 @@ def find_notes(im_name):
 	# key is col #
 	# value is tuple (streak_start_row, streak_end_row)
 
-	for col in range(140,cols):
+	for col in range(bypass_clef,cols):
 		brightnesses = []
 		for row in range(rows):
 			brightnesses.append(img[row,col])
@@ -114,13 +116,13 @@ def find_notes(im_name):
 
 	boxes = [] #tuples
 
-	for col in range(140,cols):
+	for col in range(bypass_clef,cols):
 		current_desc = 0
 		box_range = []
 		if descriptors[col] == FULL_NOTE:
 			box_range.append(col)
 			i = 1
-			while current_desc != UNKNOWN and (col-i>=140):
+			while current_desc != UNKNOWN and (col-i>=bypass_clef):
 				current_desc = descriptors[col-i]
 				if current_desc != UNKNOWN:
 					box_range.append(col-i)
@@ -133,11 +135,11 @@ def find_notes(im_name):
 				if current_desc != UNKNOWN:
 					box_range.append(col+j)
 				j+=1
-		box_tolerance = 5 #pixels to extend past last partial_note reading on either side
+		box_tolerance = 2 #pixels to extend past last partial_note reading on either side
 		if len(box_range) > 0:
 			max_col = max(box_range) + box_tolerance
 			min_col = min(box_range) - box_tolerance
-			if min_col < 140:
+			if min_col < bypass_clef:
 				min_col += box_tolerance
 			if max_col > cols:
 				max_col -= box_tolerance
@@ -176,7 +178,7 @@ def find_notes(im_name):
 Run code
 '''
 if __name__ == '__main__':
-	im_name = 'images/quarter_note_run.png'
+	im_name = 'images/eighth_notes.jpg'
 	find_notes(im_name)
 	#note_name = 'images/note2.png'
 	#treble_name = 'images/treble_clef.png'
