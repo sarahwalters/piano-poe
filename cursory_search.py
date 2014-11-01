@@ -2,6 +2,7 @@ import cv2
 import cv2.cv
 import numpy as np
 from matplotlib import pyplot as plt
+from get_lines import get_lines
 
 np.set_printoptions(threshold=np.nan)
 
@@ -42,8 +43,7 @@ def read_staff_lines(img):
 
 	return staff_lines
 
-def find_notes(im_name):
-	img = cv2.imread(im_name,0)
+def find_notes(img):
 	rows, cols = np.shape(img)
 
 	#lines = read_staff_lines(img)
@@ -69,7 +69,8 @@ def find_notes(im_name):
 			start=col
 			is_black=True
 		if 0 not in brightnesses and is_black == True:
-			boxes.append((start-1,col+1))
+			if (col+1 - start-1) > 5:
+				boxes.append((start-1,col+1))
 			is_black = False
 
 	print boxes
@@ -84,9 +85,6 @@ def find_notes(im_name):
 				brightnesses.append(img[row][c])
 
 			loc_index = c - box[0]
-			#print start_row, end_row
-			#START ROWS NOT CHANGING WHEN ASSIGNED LOL IT DONT WORK
-				#print i,loc_index
 			note[:,loc_index] = brightnesses
 		#print note
 
@@ -103,8 +101,11 @@ def find_notes(im_name):
 Run code
 '''
 if __name__ == '__main__':
-	im_name = 'images/lonely_quarters.png'
-	find_notes(im_name)
+	im_name = 'images/jinglebells.png'
+	img = cv2.imread(im_name,0)
+	lines = get_lines(img)
+	for line in lines:
+		find_notes(line)
 	#note_name = 'images/note2.png'
 	#treble_name = 'images/treble_clef.png'
 	
