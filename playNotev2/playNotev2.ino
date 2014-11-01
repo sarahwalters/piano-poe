@@ -11,38 +11,42 @@ For use with the Adafruit Motor Shield v2
 #include <Note.h>
 #include <QueueList.h>
 #include <Adafruit_MotorShield.h>
+#include <MemoryFree.h>
 #include "utility/Adafruit_PWMServoDriver.h"
+#include <avr/pgmspace.h>
 
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
-Adafruit_DCMotor *E4Motor = AFMS.getMotor(1);
-Adafruit_DCMotor *G4Motor = AFMS.getMotor(3);
+Adafruit_MotorShield AFMS PROGMEM = Adafruit_MotorShield(); 
+Adafruit_DCMotor *E4Motor PROGMEM = AFMS.getMotor(1);
+Adafruit_DCMotor *G4Motor PROGMEM = AFMS.getMotor(3);
 
 QueueList<Note> qList;
-
-Note test = Note(1, 2, 'E', 3);
 
 int state = 0;
 String incomingString = "";
 
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
-  AFMS.begin(); // create with the default frequency 1.6KHz
+  //AFMS.begin(); // create with the default frequency 1.6KHz
 }
 
 void loop() {
   int incoming;
   switch(state) {
+    // PYTHON -> ARDUINO
     case 0:  // append new info to incomingString
       if (Serial.available() > 0) {
-        incoming = Serial.read();
+        incoming = Serial.read();        
         incomingString = incomingString + char(incoming);
-    
+
         // received ! (end signal) yet?
         if (incoming == 33) {
+          Serial.println(incomingString);
           state = 1;
         }
       }
       break;
+      
+    // WITHIN ARDUINO
     case 1:  // split info into individual notes
       while (incomingString != "!") {
         // get single note from incomingString
@@ -72,20 +76,25 @@ void loop() {
       }
       Serial.println(qList.count());
       //Serial.println("Moving on to playing");
-      //state = 2;
+      state = 2;
       break;
-    case 2:
-      /*
-      if (qList.count() != 0) {
-        Serial.println(qList.count());
-      }
       
+    // ARDUINO -> MOTOR
+    case 2:
+      state = 3;
+      /*Note top;
+      Note currentSet[8];
+      if (qList.count() != 0) {
+        top = qList.pop();
+        Serial.println(String(top.getName()) + String(top.getOctave()));
+      }*/
+      
+      /*
       while (!qList.isEmpty()) {
-        Note top = qList.pop();
-        Serial.println(String(top.getName()));
+        Serial.println(String(qList.pop().getName()));
         int topStart = top.getStart();
-        boolean stillSame = true;
-        Note currentSet[100] = {top};
+        /*boolean stillSame = true;
+        Note currentSet[8] = {top};
         int index = 1;
       
         //Serial.println(qList.count());
@@ -102,12 +111,19 @@ void loop() {
 //            Serial.println("In the else!");
 //          }
         }
-      }
-      */
+      }*/
+     
+      break;
+      
+    // ARDUINO -> PYTHON
+    case 3:
+      Serial.println(qList.count());
+      state = 0;
       break;
   }
 }
 
+/*
 void play(String note) {
   if (note=="E4") {
     runMotor(E4Motor);
@@ -121,4 +137,4 @@ void runMotor(Adafruit_DCMotor *motor) {
   motor->setSpeed(75);
   delay(500);
   motor->setSpeed(0);
-}
+} */

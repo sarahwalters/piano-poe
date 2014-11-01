@@ -28,9 +28,21 @@ def serialWrapper():
 	# write midi output to serial
 	sendMidiOutput(serMap)
 
-	# close all serial connections
+	# tell the Arduino to stop reading
 	for ser in sers:
 		ser.write('!') # end character - done sending midi output
+
+
+	print '---'
+	done = False;
+	while (not done):
+		s = ser.readline()
+		if '@' in s:
+			print s
+			done = True;
+
+	# close all serial connections
+	for ser in sers:
 		ser.close()
 
 
@@ -49,8 +61,9 @@ def sendMidiOutput(serMap):
 					  [150, 'E4', 74]]
 
 	# if python-midi isn't installed, use testMidiOutput as midiOutput
-	midiOutput = testMidiOutput
-	#midiOutput = readMidi.read('midis/mary.mid')
+	#midiOutput = testMidiOutput
+	midiOutput = readMidi.read('midis/mary.mid')
+	midiOutput = midiOutput
 	
 	for item in midiOutput:
 		start = item[0]
