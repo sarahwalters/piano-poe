@@ -15,6 +15,7 @@ Installing python-midi:
 * sudo python setup.py install
 
 Compiling playNotev2.ino:
+
 -> Adafruit motor shield library:
 * Download Adafruit Library from https://learn.adafruit.com/adafruit-motor-shield-v2-for-arduino/install-software
 * Save files in arduino/libraries/Adafruit_Motorshield
@@ -32,4 +33,8 @@ Compiling playNotev2.ino:
 
 Installing OpenCV:
 * Follow the instructions on this link: https://help.ubuntu.com/community/OpenCV
+
+Installing Wand (for pdfPng):
+*sudo apt-get install python-wand
+
 
