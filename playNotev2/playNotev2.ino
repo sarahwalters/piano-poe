@@ -24,9 +24,21 @@ Note test = Note(1, 2, 'E', 3);
 int state = 0;
 String incomingString = "";
 
+int bottomSwitchPin = 2;         // the number of the input pin
+
+int state = HIGH;      // the current state of the output pin
+int reading;           // the current reading from the input pin
+int previous = LOW;    // the previous reading from the input pin
+
+// the follow variables are long's because the time, measured in miliseconds,
+// will quickly become a bigger number than can be stored in an int.
+long time = 0;         // the last time the output pin was toggled
+long debounce = 200;   // the debounce time, increase if the output flickers
+
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
   AFMS.begin(); // create with the default frequency 1.6KHz
+  pinMode(bottomSwitchPin, INPUT);
 }
 
 void loop() {
@@ -109,10 +121,25 @@ void loop() {
 }
 
 void play(String note) {
+  
+  reading = digitalRead(bottomSwitchPin);
+  
   if (note=="E4") {
     runMotor(E4Motor);
+    if (reading == HIGH && previous == LOW && millis() - time > debounce) {
+      E4motor->setSpeed(0);
+      delay(duration);
+    }
+    time = millis();
+    previous = reading;
   } else if (note == "G4") {
     runMotor(G4Motor);
+        if (reading == HIGH && previous == LOW && millis() - time > debounce) {
+          E4motor->setSpeed(0);
+          delay(duration);
+        }
+    time = millis();
+    previous = reading;
   }
 }
 
