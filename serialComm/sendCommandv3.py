@@ -1,12 +1,25 @@
+import sys
+sys.path.insert(0, '../midiReading')
+
 import serial
 import readMidi
 from math import ceil
 
+# @ -> Python sends to Arduino to start Arduino writing mode
+# % -> Arduino sends to Python to start Python writing mode
+# * -> delimiter in note strings
+# ! -> end of a set of note strings
+# & -> done with all note strings
+
 # http://stackoverflow.com/questions/676172/full-examples-of-using-pyserial-package
 
-''' handles opening/closing serial ports & calling method
-	which gets midi contents and sends them to Arduino 
-'''
+''' TUNABLE PARAMETERS '''
+setSize = 5 # how many notes Python sends upon a request from Arduino for more
+
+
+''' FUNCTIONS '''
+# handles opening/closing serial ports & calling method
+# which gets midi contents and sends them to Arduino 
 def serialWrapper():
 	# open all serial connections
 	ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
@@ -24,16 +37,17 @@ def serialWrapper():
 					  [125, 'E4', 78],
 					  [150, 'E4', 74]]
 
-	midiOutput = readMidi.read('midis/mary.mid')
-	setSize = 5
+	midiOutput = readMidi.read('../midiReading/midis/mary.mid')
 	numSets = ceil(len(midiOutput)/float(setSize))
 	setNum = 0
 
 	print numSets
 	# arduino -> python
-	while (setNum <= numSets):
+	while (setNum <= numSets+1):
 		# PYTHON READING BLOCK
-		# print 'Trying to read'
+		#print 'Trying to read'
+		#print setNum
+		#print numSets + 1
 		inc = ser.read(1000)
 			# inc: everything Arduino printed to serial during the last loop()
 			# 	   should always end with '%'
@@ -57,6 +71,8 @@ def serialWrapper():
 						ser.write('*')
 				ser.write('!')
 				# END OF PYTHON WRITING BLOCK
+			else:
+				ser.write('&')
 			ser.write('@')
 			setNum = setNum + 1
 

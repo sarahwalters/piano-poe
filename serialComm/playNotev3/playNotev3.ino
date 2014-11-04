@@ -2,11 +2,17 @@
 #include <Note.h>
 #include <QueueList.h>
 
-int state = 0;
-String incomingString = "";
-QueueList<Note> qList;
-int minQueueSize = 0;
+// TUNABLE PARAMETERS //
+int minQueueSize = 8;
 
+
+// NONTUNABLE INITIALIZATIONS //
+int state = 0; 
+QueueList<Note> qList;
+String incomingString = "";
+
+
+// FUNCTIONS //
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
 }
@@ -16,7 +22,6 @@ void loop() {
     // Arduino reading mode
     case 0: {
       if (Serial.available() > 0) {
-        
         int incoming = Serial.read();
         if (char(incoming)=='@') { // done with reading mode - DO NOT MODIFY
           state = 1; // switch to writing mode
@@ -30,6 +35,7 @@ void loop() {
     // Arduino processing mode (w/ writing capability)
     case 1: {
       // process incomingString
+      // 1) are there notes to remove?
       while (incomingString.length() > 1) {
         // get single note from front (FIFO)
         int starIndex = incomingString.indexOf('*');
@@ -57,8 +63,14 @@ void loop() {
         Note current = Note(startTime, duration, name, octave);
         qList.push(current);
       }
-      //Serial.println(String(qList.count()));
-      incomingString = ""; // clear before getting more notes
+
+      // 2) is it the overall end character (Python done sending notes?)
+      if (incomingString == "&") {
+        minQueueSize = 0; // use up all notes at the end
+      }
+      
+      // Done processing this incomingString
+      incomingString = ""; // clear before receiving more data
       state = 2; // switch to Arduino acting mode
       break;
     }
@@ -66,9 +78,40 @@ void loop() {
     // Arduino acting mode (w/ writing capability)
     case 2: {
       while (qList.count() > minQueueSize) {
-        Note next = qList.pop();
-        Serial.print(String(next.getName()) + String(next.getOctave()));
-        Serial.print(',');
+        // get first note in next set to be played
+        Note leader = qList.pop();
+
+        // establish array of more notes to be played simultaneously
+        Note noteSet[8] = {leader};
+        int i = 1;
+
+        // add subsequent "follower" notes which start at the same time to the array
+        int leaderStart = leader.getStart();
+        if (qList.count() > 0) {
+          Note follower = qList.peek();
+
+          // while notes start at the same time...
+          while (follower.getStart() == leaderStart) {
+            noteSet[i] = qList.pop(); // add to array
+            i++;
+
+            // look at next; if there is no next, break
+            if (qList.count() > 0) {
+              follower = qList.peek();
+            } else {
+              break;
+            }
+          }
+        }
+
+        // play the notes
+        Serial.print(noteSet[0].getStart());
+        Serial.print(':');
+        for (int j=0; j<i; j++) {
+          Serial.print(getNameAndOctave(noteSet[j]));
+          Serial.print('/');
+        }
+        Serial.println();
       }
       state = 3;
       break;
@@ -86,4 +129,8 @@ void loop() {
     default:
       break;
   }
+}
+
+String getNameAndOctave(Note n) {
+  return String(n.getName()) + String(n.getOctave());
 }
