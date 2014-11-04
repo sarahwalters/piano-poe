@@ -24,8 +24,7 @@ def serialWrapper():
 	# open all serial connections
 	ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
 
-	# python -> arduino
-	ser.write('@')
+	
 
 	testMidiOutput = [[0, 'E4', 72],
 					  [0, 'G3', 70],
@@ -41,7 +40,9 @@ def serialWrapper():
 	numSets = ceil(len(midiOutput)/float(setSize))
 	setNum = 0
 
-	print numSets
+	# python -> arduino
+	ser.write('@')
+
 	# arduino -> python
 	while (setNum <= numSets+1):
 		# PYTHON READING BLOCK

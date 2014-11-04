@@ -4,12 +4,14 @@
 
 // TUNABLE PARAMETERS //
 int minQueueSize = 8;
+int ticksPerSec = 25; // midi time -> second conversion
 
 
 // NONTUNABLE INITIALIZATIONS //
 int state = 0; 
 QueueList<Note> qList;
 String incomingString = "";
+long startMillis = 0;
 
 
 // FUNCTIONS //
@@ -19,7 +21,7 @@ void setup() {
 
 void loop() {
   switch(state) {
-    // Arduino reading mode
+    // Arduino reading mode;lj
     case 0: {
       if (Serial.available() > 0) {
         int incoming = Serial.read();
@@ -105,12 +107,20 @@ void loop() {
         }
 
         // play the notes
+        while (ticks() < noteSet[0].getStart()) {
+          delay(10);
+        }
+
         Serial.print(noteSet[0].getStart());
         Serial.print(':');
         for (int j=0; j<i; j++) {
           Serial.print(getNameAndOctave(noteSet[j]));
           Serial.print('/');
+          if (startMillis == 0) {
+            startMillis = millis();
+          }
         }
+        Serial.print(ticks());
         Serial.println();
       }
       state = 3;
@@ -133,4 +143,9 @@ void loop() {
 
 String getNameAndOctave(Note n) {
   return String(n.getName()) + String(n.getOctave());
+}
+
+long ticks() {
+  long ms = millis() - startMillis;
+  return ms*ticksPerSec/1000;
 }
