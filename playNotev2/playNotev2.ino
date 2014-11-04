@@ -129,14 +129,17 @@ void play(String note) {
     if (reading == HIGH && previous == LOW && millis() - time > debounce) {
       E4motor->setSpeed(0);
       delay(duration);
+      runMotor (E4Motor)
     }
     time = millis();
     previous = reading;
+    
   } else if (note == "G4") {
     runMotor(G4Motor);
         if (reading == HIGH && previous == LOW && millis() - time > debounce) {
           E4motor->setSpeed(0);
           delay(duration);
+          runMotor(G4Motor)
         }
     time = millis();
     previous = reading;
