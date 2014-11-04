@@ -1,6 +1,9 @@
 #include <Wire.h>
 #include <Note.h>
 #include <QueueList.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_PWMServoDriver.h"
+#include <avr/pgmspace.h>
 
 // TUNABLE PARAMETERS //
 int minQueueSize = 8;
@@ -12,11 +15,19 @@ int state = 0;
 QueueList<Note> qList;
 String incomingString = "";
 long startMillis = 0;
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_DCMotor *E4Motor = AFMS.getMotor(1);
+Adafruit_DCMotor *G4Motor = AFMS.getMotor(3);
 
 
 // FUNCTIONS //
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
+  AFMS.begin();
+  E4Motor->setSpeed(0);
+  G4Motor->setSpeed(0);
+  E4Motor->run(FORWARD);
+  G4Motor->run(FORWARD);
 }
 
 void loop() {
@@ -59,6 +70,7 @@ void loop() {
         
         char charBuf[2];
         nameAndOctave.toCharArray(charBuf, 2);
+        //Serial.println(nameAndOctave);
         char name = charBuf[0];
         
         // ...make an object
@@ -106,22 +118,16 @@ void loop() {
           }
         }
 
-        // play the notes
+        //Serial.print(String(noteSet[0].getStart()));
+
         while (ticks() < noteSet[0].getStart()) {
-          delay(10);
+          delay(50);
+          //Serial.print(ticks());
+          Serial.print(".");
         }
 
-        Serial.print(noteSet[0].getStart());
-        Serial.print(':');
-        for (int j=0; j<i; j++) {
-          Serial.print(getNameAndOctave(noteSet[j]));
-          Serial.print('/');
-          if (startMillis == 0) {
-            startMillis = millis();
-          }
-        }
-        Serial.print(ticks());
-        Serial.println();
+        // play the note set
+        play(noteSet, i);
       }
       state = 3;
       break;
@@ -148,4 +154,36 @@ String getNameAndOctave(Note n) {
 long ticks() {
   long ms = millis() - startMillis;
   return ms*ticksPerSec/1000;
+}
+
+void play(Note noteSet[8], int i) {
+  E4Motor->setSpeed(0);
+  G4Motor->setSpeed(0);
+
+  int startTime = noteSet[0].getStart();
+  //Serial.print(ticks());
+  //Serial.print(" - ");
+  //Serial.print(startTime);
+  //Serial.print(":");
+  // loop through all notes in simultaneous set
+  Serial.println();
+  for (int j=0; j<i; j++) {
+    String id = getNameAndOctave(noteSet[j]);
+
+    // choose the right motor
+    if (id == "E4") {
+      E4Motor->setSpeed(50);
+    } else if (id == "G4") {
+      G4Motor->setSpeed(50);
+    }
+
+    Serial.print(id);
+    Serial.print("/");
+
+    // if this is the first note, start the tick counter
+    if (startMillis == 0) {
+      startMillis = millis();
+    }
+  }
+  Serial.println();
 }

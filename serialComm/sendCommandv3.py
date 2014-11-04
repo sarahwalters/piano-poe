@@ -24,8 +24,6 @@ def serialWrapper():
 	# open all serial connections
 	ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
 
-	
-
 	testMidiOutput = [[0, 'E4', 72],
 					  [0, 'G3', 70],
 					  [25, 'D4', 72],
@@ -46,7 +44,7 @@ def serialWrapper():
 	# arduino -> python
 	while (setNum <= numSets+1):
 		# PYTHON READING BLOCK
-		#print 'Trying to read'
+		# print 'Trying to read'
 		#print setNum
 		#print numSets + 1
 		inc = ser.read(1000)
