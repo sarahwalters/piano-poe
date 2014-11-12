@@ -16,7 +16,10 @@ String incomingString = "";
 long startMillis = 0;
 Servo sE4;
 Servo sG4;
-int ticks[2];
+Servo servos[2] = {sE4, sG4};
+int servoEnd[2] = {-1, -1};
+int startPos = 0;
+int stopPos = 20;
 
 
 // FUNCTIONS //
@@ -90,10 +93,11 @@ void loop() {
       while (qList.count() > minQueueSize) {
         // get first note in next set to be played
         Note leader = qList.pop();
+        servoEndPush(leader);
 
         // establish array of more notes to be played simultaneously
-        Note noteSet[8] = {leader};
         int i = 1;
+        String noteIds[10] = {getNameAndOctave(leader)}; // revisit?
 
         // add subsequent "follower" notes which start at the same time to the array
         int leaderStart = leader.getStart();
@@ -102,7 +106,9 @@ void loop() {
 
           // while notes start at the same time...
           while (follower.getStart() == leaderStart) {
-            noteSet[i] = qList.pop(); // add to array
+          	qList.pop(); // this is follower - already have; need to get out of queue
+            noteIds[i] = getNameAndOctave(follower); // add to set to play
+            servoEndPush(follower); // store end time
             i++;
 
             // look at next; if there is no next, break
@@ -114,16 +120,22 @@ void loop() {
           }
         }
 
-        //Serial.print(String(noteSet[0].getStart()));
-
-        while (ticks() < noteSet[0].getStart()) {
-          delay(50);
-          //Serial.print(ticks());
-          Serial.print(".");
+        while (ticks() < leaderStart) {
+        	Serial.print(".");
+        	for (int i=0; i < sizeof(servoEnd); i++) {
+        		int endTime = servoEnd[i];
+        		if (endTime < ticks() && endTime > 0) { // time to end note
+        			// stop the appropriate servo
+        			servos[i].write(stopPos);
+        			Serial.println("END: " + String(servoEnd[i]) + "--" + String(ticks()));
+        			servoEnd[i] = -1;
+        		}
+        	}
+        	delay(10);
         }
-
-        // play the note set
-        play(noteSet, i);
+        Serial.println(getNameAndOctave(leader));
+        Serial.println("START: " + String(leader.getStart()) + "--" + String(ticks()));
+        playNotes(noteIds);
       }
       state = 3;
       break;
@@ -152,29 +164,26 @@ long ticks() {
   return ms*ticksPerSec/1000;
 }
 
-void play(Note noteSet[8], int i) {
-  int startTime = noteSet[0].getStart();
-  int endTime = startTime + noteSet[0].getDuration();
+void servoEndPush(Note n) {
+	String id = getNameAndOctave(n);
+	if (id == "E4") {
+		servoEnd[0] = n.getStart() + n.getDuration();
+	} else if (id == "G4") {
+		servoEnd[1] = n.getStart() + n.getDuration();
+	}
+	//Serial.println(String(servoEnd[0]) + ", " + String(servoEnd[1]));
+}
 
-  for (int j=0; j<i; j++) {
-    String id = getNameAndOctave(noteSet[j]);
-
-    // choose the right motor
-    if (id == "E4") {
-      sE4.write(10);
-    } else if (id == "G4") {
-      sG4.write(10);
-    }
-
-    Serial.print(id);
-    Serial.print("/");
-
-    // if this is the first note, start the tick counter
-    if (startMillis == 0) {
-      startMillis = millis();
-    }
-  }
-
-  // DOES NOT handle durations - while loop broken.
-  Serial.println();
+void playNotes(String noteSet[10]) {
+	// if first note played, then set start time of piece to ticks()
+	if (startMillis == 0) {
+		startMillis = millis();
+	}
+	for (int i=0; i < sizeof(noteSet); i++) {
+		if (noteSet[i] == "E4") {
+			sE4.write(startPos);
+		} else if (noteSet[i] == "G4") {
+			sG4.write(startPos);
+		}
+	}	
 }

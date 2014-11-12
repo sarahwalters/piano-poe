@@ -21,7 +21,7 @@ setSize = 5 # how many notes Python sends upon a request from Arduino for more
 # handles opening/closing serial ports & calling method
 # which gets midi contents and sends them to Arduino 
 def serialWrapper():
-	# open all serial connections
+	# open all serial connectionsre
 	ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
 
 	testMidiOutput = [[0, 'E4', 72],
