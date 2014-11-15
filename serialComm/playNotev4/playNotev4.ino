@@ -10,44 +10,60 @@ int ticksPerSec = 18; // midi time -> second conversion
 
 
 // NONTUNABLE INITIALIZATIONS //
-int state = 0; 
-QueueList<Note> qList;
+// ... for FSM
+int state = 0;
 String incomingString = "";
+QueueList<Note> qList;
+
+// ... for timing
 long startMillis = 0;
+
+// ...servo stuff
+Servo sC4;
+Servo sD4;
 Servo sE4;
 Servo sG4;
-Servo servos[2] = {sE4, sG4};
-int servoEnd[2] = {-1, -1};
-int startPos = 0;
-int stopPos = 20;
+Servo servos[4] = {sC4, sD4, sE4, sG4}; // in pin order, starting at 2
+int servoEnd[4] = {-1, -1, -1, -1};
+int numServos = 4;
+int onPos = 0;
+int offPos = 20;
 
 
-// FUNCTIONS //
+// MAIN FUNCTIONS //
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
-  sE4.attach(7);
-  sG4.attach(9);
+
+  // attach all servos to pins and set to default positions
+  for (int i=0; i<numServos; i++) {
+  	int pin = i+2;
+  	servos[i].attach(pin);
+  	servos[i].write(100);
+  }
 }
+
 
 void loop() {
   switch(state) {
-    // Arduino reading mode
+    // 0) Arduino reading mode
     case 0: {
       if (Serial.available() > 0) {
+      	// get what Python sent
         int incoming = Serial.read();
-        if (char(incoming)=='@') { // done with reading mode - DO NOT MODIFY
-          state = 1; // switch to writing mode
+
+        // was it end character?
+        if (char(incoming)=='@') {
+          state = 1; // switch to writing mode - DO NOT MODIFY
         } else {
-          incomingString = incomingString + char(incoming);
+          incomingString = incomingString + char(incoming); // add to string of notes
         }
       }
       break;
     }
     
-    // Arduino processing mode (w/ writing capability)
+    // 1) Arduino processing mode (w/ writing capability)
     case 1: {
-      // process incomingString
-      // 1) are there notes to remove?
+      // are there still notes in incomingString?
       while (incomingString.length() > 1) {
         // get single note from front (FIFO)
         int starIndex = incomingString.indexOf('*');
@@ -65,19 +81,17 @@ void loop() {
         
         // ...note name and octave
         String nameAndOctave = noteStr.substring (commaIndex2+1);
-        int octave = nameAndOctave.substring(1).toInt();
-        
         char charBuf[2];
         nameAndOctave.toCharArray(charBuf, 2);
-        //Serial.println(nameAndOctave);
         char name = charBuf[0];
+        int octave = nameAndOctave.substring(1).toInt();
         
         // ...make an object
         Note current = Note(startTime, duration, name, octave);
         qList.push(current);
       }
 
-      // 2) is it the overall end character (Python done sending notes?)
+      // is remaining 1 character the end-of-piece character? (Python done sending notes) 
       if (incomingString == "&") {
         minQueueSize = 0; // use up all notes at the end
       }
@@ -88,16 +102,15 @@ void loop() {
       break;
     }
     
-    // Arduino acting mode (w/ writing capability)
+    // 2) Arduino acting mode (w/ writing capability)
     case 2: {
       while (qList.count() > minQueueSize) {
         // get first note in next set to be played
         Note leader = qList.pop();
-        servoEndPush(leader);
 
         // establish array of more notes to be played simultaneously
         int i = 1;
-        String noteIds[10] = {getNameAndOctave(leader)}; // revisit?
+        Note currentNotes[10] = {leader}; // revisit?
 
         // add subsequent "follower" notes which start at the same time to the array
         int leaderStart = leader.getStart();
@@ -107,8 +120,7 @@ void loop() {
           // while notes start at the same time...
           while (follower.getStart() == leaderStart) {
           	qList.pop(); // this is follower - already have; need to get out of queue
-            noteIds[i] = getNameAndOctave(follower); // add to set to play
-            servoEndPush(follower); // store end time
+            currentNotes[i] = follower; // add to set to play
             i++;
 
             // look at next; if there is no next, break
@@ -120,29 +132,32 @@ void loop() {
           }
         }
 
+        // WHILE WAITING, IS IT TIME TO END ANY NOTE?
+        Serial.println("Next end times: " + String(servoEnd[0]) + ", " + String(servoEnd[1]));
         while (ticks() < leaderStart) {
         	Serial.print(".");
-        	for (int i=0; i < sizeof(servoEnd); i++) {
+        	for (int i=0; i < numServos; i++) {
         		int endTime = servoEnd[i];
         		if (endTime < ticks() && endTime > 0) { // time to end note
         			// stop the appropriate servo
-        			servos[i].write(stopPos);
-        			Serial.println("END: " + String(servoEnd[i]) + "--" + String(ticks()));
+        			servos[i].write(offPos);
+        			Serial.println("END: " + String(i) + ", " + String(servoEnd[i]) + "--" + String(ticks()));
         			servoEnd[i] = -1;
         		}
         	}
-        	delay(10);
+        	delay(20);
         }
+        
+        // PLAY THE NOTES
         Serial.println(getNameAndOctave(leader));
         Serial.println("START: " + String(leader.getStart()) + "--" + String(ticks()));
-        playNotes(noteIds);
+        playNotes(currentNotes);
       }
       state = 3;
       break;
     }
       
-    // This case exists solely to switch the Arduino back to reading mode when it's
-    // ready to process more data. DO NOT MODIFY
+    // 3) DO NOT MODIFY - exists solely to switch the Arduino back to reading mode when it's ready to process more data
     case 3: {
       Serial.print("%");
       state = 0;
@@ -155,6 +170,8 @@ void loop() {
   }
 }
 
+
+// HELPER FUNCTIONS //
 String getNameAndOctave(Note n) {
   return String(n.getName()) + String(n.getOctave());
 }
@@ -166,24 +183,37 @@ long ticks() {
 
 void servoEndPush(Note n) {
 	String id = getNameAndOctave(n);
-	if (id == "E4") {
-		servoEnd[0] = n.getStart() + n.getDuration();
+	int index;
+	if (id == "C4") {
+		index = 0;
+	} else if (id == "D4") {
+		index = 1;
+	} else if (id == "E4") {
+		index = 2;
 	} else if (id == "G4") {
-		servoEnd[1] = n.getStart() + n.getDuration();
+		index = 3;
 	}
-	//Serial.println(String(servoEnd[0]) + ", " + String(servoEnd[1]));
+	servoEnd[index] = n.getStart() + n.getDuration();
 }
 
-void playNotes(String noteSet[10]) {
+void playNotes(Note noteSet[10]) {
 	// if first note played, then set start time of piece to ticks()
 	if (startMillis == 0) {
 		startMillis = millis();
 	}
-	for (int i=0; i < sizeof(noteSet); i++) {
-		if (noteSet[i] == "E4") {
-			sE4.write(startPos);
-		} else if (noteSet[i] == "G4") {
-			sG4.write(startPos);
+	for (int i=0; i < numServos; i++) {
+		Servo s;
+		String id = getNameAndOctave(noteSet[i]);
+		if (id == "C4") {
+			s = sC4;
+		} else if (id == "D4") {
+			s = sD4;
+		} else if (id == "E4") {
+			s = sE4;
+		} else if (id == "G4") {
+			s = sG4;
 		}
+		s.write(onPos);
+		servoEndPush(noteSet[i]);
 	}	
 }

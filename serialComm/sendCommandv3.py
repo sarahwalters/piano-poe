@@ -35,6 +35,7 @@ def serialWrapper():
 					  [150, 'E4', 74]]
 
 	midiOutput = readMidi.read('../midiReading/midis/mary.mid')
+	#midiOutput = testMidiOutput
 	numSets = ceil(len(midiOutput)/float(setSize))
 	setNum = 0
 
@@ -65,7 +66,7 @@ def serialWrapper():
 						noteArray = midiOutput[setNum*setSize + i]
 						print noteArray
 						ser.write(str(noteArray[0]))
-						ser.write(',25,')
+						ser.write(',20,')
 						ser.write(noteArray[1])
 						ser.write('*')
 				ser.write('!')
