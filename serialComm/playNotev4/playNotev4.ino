@@ -25,9 +25,9 @@ Servo sE4;
 Servo sG4;
 Servo servos[4] = {sC4, sD4, sE4, sG4}; // in pin order, starting at 2
 int servoEnd[4] = {-1, -1, -1, -1};
+int onPos[4] = {160, 152, 143, 37};
+int offPos[4] = {140, 137, 131, 49};
 int numServos = 4;
-int onPos = 0;
-int offPos = 20;
 
 
 // MAIN FUNCTIONS //
@@ -38,7 +38,7 @@ void setup() {
   for (int i=0; i<numServos; i++) {
   	int pin = i+2;
   	servos[i].attach(pin);
-  	servos[i].write(100);
+  	servos[i].write(142);
   }
 }
 
@@ -140,7 +140,7 @@ void loop() {
         		int endTime = servoEnd[i];
         		if (endTime < ticks() && endTime > 0) { // time to end note
         			// stop the appropriate servo
-        			servos[i].write(offPos);
+        			servos[i].write(offPos[i]);
         			Serial.println("END: " + String(i) + ", " + String(servoEnd[i]) + "--" + String(ticks()));
         			servoEnd[i] = -1;
         		}
@@ -203,17 +203,22 @@ void playNotes(Note noteSet[10]) {
 	}
 	for (int i=0; i < numServos; i++) {
 		Servo s;
+		int onPosIndex;
 		String id = getNameAndOctave(noteSet[i]);
 		if (id == "C4") {
 			s = sC4;
+			onPosIndex = 0;
 		} else if (id == "D4") {
 			s = sD4;
+			onPosIndex = 1;
 		} else if (id == "E4") {
 			s = sE4;
+			onPosIndex = 2;
 		} else if (id == "G4") {
 			s = sG4;
+			onPosIndex = 3;
 		}
-		s.write(onPos);
+		s.write(onPos[onPosIndex]);
 		servoEndPush(noteSet[i]);
 	}	
 }
