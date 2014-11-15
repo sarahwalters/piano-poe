@@ -9,19 +9,14 @@ class Note
 {
   public:
     Note();
-    Note(int start, int duration, char name, int octave);
+    Note(int start, int duration, int pitch);
     int getStart();
     int getDuration();
-    char getName();
-    int getOctave();
-    /*int getNext();
-    void setNext(int next);*/
+    int getPitch();
   private:
     int _start;
     int _duration;
-    char _name;
-    int _octave;
-    int _next;
+    int _pitch;
 };
 
 #endif

@@ -41,15 +41,16 @@ def read(midiFile):
 	for noteObj in noteObjects:
 		if isinstance(noteObj, midi.events.NoteOnEvent):
 			# http://jazzparser.granroth-wilding.co.uk/api/midi.NoteEvent-class.html#velocity
-			noteName = toNoteName(noteObj.data[0])
+			#noteName = toNoteName(noteObj.data[0])
 			velocity = noteObj.data[1] # How hard the note is played or how quickly it's released (0-127)
 			if (velocity > 0): # For some reason some midi files include extra notes w/ velocity 0
 				time = time + noteObj.tick
-				notes.append([time, noteName, velocity])
+				notes.append([time, noteObj.data[0], velocity])
 
 	return notes
 
 
+# obsolete
 def toNoteName(pitch):
 	''' Convert from pitch number to note name
 		INPUTS: pitch (integer, 0-127 -> C4, middle C, is 60)

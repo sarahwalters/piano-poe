@@ -4,12 +4,12 @@
 #include <avr/pgmspace.h>
 #include <Servo.h>
 
-// TUNABLE PARAMETERS //
+
+// INITIALIZATIONS //
+// ... timing
 int minQueueSize = 8;
 int ticksPerSec = 18; // midi time -> second conversion
 
-
-// NONTUNABLE INITIALIZATIONS //
 // ... for FSM
 int state = 0;
 String incomingString = "";
@@ -18,16 +18,17 @@ QueueList<Note> qList;
 // ... for timing
 long startMillis = 0;
 
-// ...servo stuff
-Servo sC4;
-Servo sD4;
-Servo sE4;
-Servo sG4;
-Servo servos[4] = {sC4, sD4, sE4, sG4}; // in pin order, starting at 2
-int servoEnd[4] = {-1, -1, -1, -1};
-int onPos[4] = {160, 152, 143, 37};
-int offPos[4] = {140, 137, 131, 49};
-int numServos = 4;
+// ... for pitch/note name/key index conversion
+String noteNames[12] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+int lowestNote = 60; // starting at C4 for now
+
+// ... servo stuff
+Servo sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4;
+Servo servos[8] = {sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4}; // in pin order, starting at 2
+int servoEnd[8];
+int onPos[8] = {160, 0, 152, 0, 143, 0, 0, 37};
+int offPos[8] = {140, 0, 137, 0, 131, 0, 0, 49};
+int numServos = 8;
 
 
 // MAIN FUNCTIONS //
@@ -38,7 +39,8 @@ void setup() {
   for (int i=0; i<numServos; i++) {
   	int pin = i+2;
   	servos[i].attach(pin);
-  	servos[i].write(142);
+  	servos[i].write(offPos[i]);
+    servoEnd[i] = -1;
   }
 }
 
@@ -75,19 +77,13 @@ void loop() {
         int commaIndex1 = noteStr.indexOf(",");
         int commaIndex2 = noteStr.indexOf(",", commaIndex1 + 1);
         
-        // ...start time and duration
+        // ...start time, duration, pitch
         int startTime = noteStr.substring(0,commaIndex1).toInt();
         int duration = noteStr.substring (commaIndex1+1, commaIndex2).toInt();
-        
-        // ...note name and octave
-        String nameAndOctave = noteStr.substring (commaIndex2+1);
-        char charBuf[2];
-        nameAndOctave.toCharArray(charBuf, 2);
-        char name = charBuf[0];
-        int octave = nameAndOctave.substring(1).toInt();
+        int pitch = noteStr.substring (commaIndex2+1).toInt();
         
         // ...make an object
-        Note current = Note(startTime, duration, name, octave);
+        Note current = Note(startTime, duration, pitch);
         qList.push(current);
       }
 
@@ -109,7 +105,7 @@ void loop() {
         Note leader = qList.pop();
 
         // establish array of more notes to be played simultaneously
-        int i = 1;
+        int stopCounter = 1;
         Note currentNotes[10] = {leader}; // revisit?
 
         // add subsequent "follower" notes which start at the same time to the array
@@ -120,8 +116,8 @@ void loop() {
           // while notes start at the same time...
           while (follower.getStart() == leaderStart) {
           	qList.pop(); // this is follower - already have; need to get out of queue
-            currentNotes[i] = follower; // add to set to play
-            i++;
+            currentNotes[stopCounter] = follower; // add to set to play
+            stopCounter++;
 
             // look at next; if there is no next, break
             if (qList.count() > 0) {
@@ -133,7 +129,6 @@ void loop() {
         }
 
         // WHILE WAITING, IS IT TIME TO END ANY NOTE?
-        Serial.println("Next end times: " + String(servoEnd[0]) + ", " + String(servoEnd[1]));
         while (ticks() < leaderStart) {
         	Serial.print(".");
         	for (int i=0; i < numServos; i++) {
@@ -141,7 +136,7 @@ void loop() {
         		if (endTime < ticks() && endTime > 0) { // time to end note
         			// stop the appropriate servo
         			servos[i].write(offPos[i]);
-        			Serial.println("END: " + String(i) + ", " + String(servoEnd[i]) + "--" + String(ticks()));
+        			Serial.println("END: " + String(servoEnd[i]) + "--" + String(ticks()));
         			servoEnd[i] = -1;
         		}
         	}
@@ -151,7 +146,7 @@ void loop() {
         // PLAY THE NOTES
         Serial.println(getNameAndOctave(leader));
         Serial.println("START: " + String(leader.getStart()) + "--" + String(ticks()));
-        playNotes(currentNotes);
+        playNotes(currentNotes, stopCounter);
       }
       state = 3;
       break;
@@ -173,7 +168,14 @@ void loop() {
 
 // HELPER FUNCTIONS //
 String getNameAndOctave(Note n) {
-  return String(n.getName()) + String(n.getOctave());
+  int pitch = n.getPitch();
+  String name = noteNames[pitch%12];
+  int octave = int(pitch/12)-1;
+  return name + String(octave);
+}
+
+int getKeyIndex(Note n) {
+  return n.getPitch() - lowestNote; // C4 is 0th note -> pitch of 60
 }
 
 long ticks() {
@@ -181,44 +183,21 @@ long ticks() {
   return ms*ticksPerSec/1000;
 }
 
-void servoEndPush(Note n) {
-	String id = getNameAndOctave(n);
-	int index;
-	if (id == "C4") {
-		index = 0;
-	} else if (id == "D4") {
-		index = 1;
-	} else if (id == "E4") {
-		index = 2;
-	} else if (id == "G4") {
-		index = 3;
-	}
-	servoEnd[index] = n.getStart() + n.getDuration();
-}
-
-void playNotes(Note noteSet[10]) {
+void playNotes(Note noteSet[10], int stopIndex) {
 	// if first note played, then set start time of piece to ticks()
 	if (startMillis == 0) {
 		startMillis = millis();
 	}
-	for (int i=0; i < numServos; i++) {
-		Servo s;
-		int onPosIndex;
-		String id = getNameAndOctave(noteSet[i]);
-		if (id == "C4") {
-			s = sC4;
-			onPosIndex = 0;
-		} else if (id == "D4") {
-			s = sD4;
-			onPosIndex = 1;
-		} else if (id == "E4") {
-			s = sE4;
-			onPosIndex = 2;
-		} else if (id == "G4") {
-			s = sG4;
-			onPosIndex = 3;
-		}
-		s.write(onPos[onPosIndex]);
-		servoEndPush(noteSet[i]);
-	}	
+
+  // go through note set
+	for (int i=0; i < stopIndex; i++) {
+    // get current note
+    int keyIndex = getKeyIndex(noteSet[i]);
+
+    // if it's in range, move servo and store the end time
+    if (keyIndex >= 0 && keyIndex < numServos) {
+      servos[keyIndex].write(onPos[keyIndex]); // move the servo
+      servoEnd[keyIndex] = noteSet[i].getStart() + noteSet[i].getDuration(); // store the end time
+	}
+  }	
 }
