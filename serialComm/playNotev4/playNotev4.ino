@@ -7,8 +7,8 @@
 
 // INITIALIZATIONS //
 // ... timing
-int minQueueSize = 8;
-int ticksPerSec = 18; // midi time -> second conversion
+int minQueueSize = 15;
+int ticksPerSec = 25; // midi time -> second conversion
 
 // ... for FSM
 int state = 0;
@@ -26,8 +26,10 @@ int lowestNote = 60; // starting at C4 for now
 Servo sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4;
 Servo servos[8] = {sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4}; // in pin order, starting at 2
 int servoEnd[8];
-int onPos[8] = {160, 0, 152, 0, 143, 0, 0, 37};
-int offPos[8] = {140, 0, 137, 0, 131, 0, 0, 49};
+//int onPos[8] = {160, 0, 152, 0, 143, 0, 0, 37};
+//int offPos[8] = {140, 0, 137, 0, 131, 0, 0, 49};
+int onPos[8] = {7, 0, 171, 0, 180, 0, 0, 178};
+int offPos[8] = {18, 0, 163, 0, 168, 0, 0, 168};
 int numServos = 8;
 
 
@@ -140,7 +142,7 @@ void loop() {
         			servoEnd[i] = -1;
         		}
         	}
-        	delay(20);
+        	delay(5);
         }
         
         // PLAY THE NOTES
