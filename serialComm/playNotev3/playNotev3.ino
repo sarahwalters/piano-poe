@@ -1,20 +1,29 @@
 #include <Wire.h>
 #include <Note.h>
 #include <QueueList.h>
+#include <avr/pgmspace.h>
+#include <Servo.h>
 
 // TUNABLE PARAMETERS //
 int minQueueSize = 8;
+int ticksPerSec = 18; // midi time -> second conversion
 
 
 // NONTUNABLE INITIALIZATIONS //
 int state = 0; 
 QueueList<Note> qList;
 String incomingString = "";
+long startMillis = 0;
+Servo sE4;
+Servo sG4;
+int ticks[2];
 
 
 // FUNCTIONS //
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
+  sE4.attach(7);
+  sG4.attach(9);
 }
 
 void loop() {
@@ -57,6 +66,7 @@ void loop() {
         
         char charBuf[2];
         nameAndOctave.toCharArray(charBuf, 2);
+        //Serial.println(nameAndOctave);
         char name = charBuf[0];
         
         // ...make an object
@@ -104,14 +114,16 @@ void loop() {
           }
         }
 
-        // play the notes
-        Serial.print(noteSet[0].getStart());
-        Serial.print(':');
-        for (int j=0; j<i; j++) {
-          Serial.print(getNameAndOctave(noteSet[j]));
-          Serial.print('/');
+        //Serial.print(String(noteSet[0].getStart()));
+
+        while (ticks() < noteSet[0].getStart()) {
+          delay(50);
+          //Serial.print(ticks());
+          Serial.print(".");
         }
-        Serial.println();
+
+        // play the note set
+        play(noteSet, i);
       }
       state = 3;
       break;
@@ -133,4 +145,36 @@ void loop() {
 
 String getNameAndOctave(Note n) {
   return String(n.getName()) + String(n.getOctave());
+}
+
+long ticks() {
+  long ms = millis() - startMillis;
+  return ms*ticksPerSec/1000;
+}
+
+void play(Note noteSet[8], int i) {
+  int startTime = noteSet[0].getStart();
+  int endTime = startTime + noteSet[0].getDuration();
+
+  for (int j=0; j<i; j++) {
+    String id = getNameAndOctave(noteSet[j]);
+
+    // choose the right motor
+    if (id == "E4") {
+      sE4.write(10);
+    } else if (id == "G4") {
+      sG4.write(10);
+    }
+
+    Serial.print(id);
+    Serial.print("/");
+
+    // if this is the first note, start the tick counter
+    if (startMillis == 0) {
+      startMillis = millis();
+    }
+  }
+
+  // DOES NOT handle durations - while loop broken.
+  Serial.println();
 }

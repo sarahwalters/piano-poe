@@ -15,21 +15,36 @@ For use with the Adafruit Motor Shield v2
 #include "utility/Adafruit_PWMServoDriver.h"
 #include <avr/pgmspace.h>
 
-Adafruit_MotorShield AFMS PROGMEM = Adafruit_MotorShield(); 
-Adafruit_DCMotor *E4Motor PROGMEM = AFMS.getMotor(1);
-Adafruit_DCMotor *G4Motor PROGMEM = AFMS.getMotor(3);
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_DCMotor *E4Motor = AFMS.getMotor(1);
+Adafruit_DCMotor *G4Motor = AFMS.getMotor(3);
 
 QueueList<Note> qList;
 
 int state = 0;
 String incomingString = "";
 
+int bottomSwitchPin = 2;         // the number of the input pin
+
+/*int state = HIGH;      // the current state of the output pin
+int reading;           // the current reading from the input pin
+int previous = LOW;    // the previous reading from the input pin*/
+
+// the follow variables are long's because the time, measured in miliseconds,
+// will quickly become a bigger number than can be stored in an int.
+long time = 0;         // the last time the output pin was toggled
+long debounce = 200;   // the debounce time, increase if the output flickers
+
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
-  //AFMS.begin(); // create with the default frequency 1.6KHz
+  AFMS.begin(); // create with the default frequency 1.6KHz
+  pinMode(bottomSwitchPin, INPUT);
 }
 
 void loop() {
+  runMotor(E4Motor);
+  runMotor(G4Motor);
+  /*
   int incoming;
   switch(state) {
     // PYTHON -> ARDUINO
@@ -111,30 +126,48 @@ void loop() {
 //            Serial.println("In the else!");
 //          }
         }
-      }*/
+      }
      
       break;
       
     // ARDUINO -> PYTHON
     case 3:
       Serial.println(qList.count());
-      state = 0;
+      state = 0;b
       break;
   }
-}
+}*/
 
 /*
 void play(String note) {
+  
+  reading = digitalRead(bottomSwitchPin);
+  
   if (note=="E4") {
     runMotor(E4Motor);
+    if (reading == HIGH && previous == LOW && millis() - time > debounce) {
+      E4motor->setSpeed(0);
+      delay(duration);
+      runMotor (E4Motor)
+    }
+    time = millis();
+    previous = reading;
+    
   } else if (note == "G4") {
     runMotor(G4Motor);
-  }
+        if (reading == HIGH && previous == LOW && millis() - time > debounce) {
+          E4motor->setSpeed(0);
+          delay(duration);
+          runMotor(G4Motor)
+        }
+    time = millis();
+    previous = reading;
+  }*/
 }
 
 void runMotor(Adafruit_DCMotor *motor) {
   motor->run(FORWARD);
-  motor->setSpeed(75);
-  delay(500);
   motor->setSpeed(0);
-} */
+  /*delay(500);
+  motor->setSpeed(0);*/
+}

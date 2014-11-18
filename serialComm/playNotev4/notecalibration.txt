@@ -1,0 +1,7 @@
+C: off = 160, on = 140
+D: off = 152, on = 137
+E: off = 143, on = 131
+F: off = 142, on = 130
+G: off = 37, on = 49
+A: off = 28, on = 43
+B: off = 20, on = 40
