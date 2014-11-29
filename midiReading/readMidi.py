@@ -96,8 +96,9 @@ def readNew(midiFile, startKey, stopKey):
 	states = []
 	keyboardArray = [0]*(stopKey-startKey+1)
 	leftoverTick = 0
+	lastTimeStr = ""
 
-	# make a string for every on/off change
+	# make a state for every on/off change
 	for noteObj in noteObjects:
 		updated = False
 
@@ -106,9 +107,6 @@ def readNew(midiFile, startKey, stopKey):
 		isNoteOff = isinstance(noteObj, midi.events.NoteOffEvent)
 
 		if isNoteOn or isNoteOff:
-			
-			
-
 			# if note is valid, update state...
 			keyboardIndex = noteObj.data[0]-startKey
 			if keyboardIndex in range(0, len(keyboardArray)):
@@ -122,9 +120,29 @@ def readNew(midiFile, startKey, stopKey):
 					time = time + durationProportion*noteObj.tick
 					leftoverTick = (1-durationProportion)*noteObj.tick
 
-				# ...and make a new state string
+				# ...and add to state array
 				newState = ''.join(map(str, keyboardArray))
-				states.append(newState+","+ str(int(time)))
-
+				timeStr = str(int(time))
+				if (timeStr == lastTimeStr):
+					# ...by adding to current state
+					currState = states[-1]
+					print currState[0]
+					print newState
+					print bitwiseOr(currState[0], newState)
+					print '--'
+					states[-1] = (newState, timeStr)
+				else:
+					# ...by making a new state string
+					states.append((newState, timeStr))
+					lastTimeStr = timeStr
 
 	return states
+
+def bitwiseOr(str1, str2): # must be strings w/ same length
+	res = ""
+	for i in range(len(str1)):
+		if str1[i] == "1" or str2[i] == "1":
+			res = res + "1"
+		else:
+			res = res + "0"
+	return res
