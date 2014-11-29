@@ -32,7 +32,7 @@ def serialWrapper():
 					  '000000010000000000000,6720',
 					  '000000000000000000000,7200']
 
-	midiOutput = readMidi.readNew('../midiReading/midis/odeToJoy.mid', 60, 71)
+	midiOutput = readMidi.readNew('../midiReading/midis/odeToJoy2.mid', 60, 71)
 	#midiOutput = testMidiOutput
 	
 	# pre-sending setup
