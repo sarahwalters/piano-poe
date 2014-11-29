@@ -1,20 +1,24 @@
 #include <EEPROM.h>
+#include <QueueList.h>
 
-int state = 0;
+int fsmState = 0;
 String incomingString = "";
 int address = 0;
-int noteLimit = 20;
-String states[20];
-int ticks[20];
-int numBytes; // how many bytes of EEPROM for 1 state
+QueueList<int> ticks;
+int lastByteLength = 0;
+int numBytes = 0; // how many bytes of EEPROM for 1 state
+
 
 void setup() {
   Serial.begin(9600); // set up Serial library at 9600 bps
+  for (int i=0; i < 1000; i++) {
+    EEPROM.write(i, B0);
+  }
 }
 
 
 void loop() {
-  switch(state) {
+  switch(fsmState) {
     // 0) Arduino reading mode
     case 0: {
       if (Serial.available() > 0) {
@@ -23,7 +27,7 @@ void loop() {
 
         // was it end character?
         if (char(incoming)=='@') {
-          state = 1; // switch to writing mode - DO NOT MODIFY
+          fsmState = 1; // switch to writing mode - DO NOT MODIFY
         } else {
           incomingString = incomingString + char(incoming); // add to string of notes
         }
@@ -33,7 +37,9 @@ void loop() {
     
     // 1) Arduino processing mode (w/ writing capability)
     case 1: {
-      while (incomingString.length() > 1) {        
+      Serial.println("In state 1");
+      Serial.println(incomingString);
+      while (incomingString.length() > 1) {      
         // parse single note
         // ...get delimiter indices
         int starIndex = incomingString.indexOf('*');
@@ -54,38 +60,58 @@ void loop() {
         // store state to EEPROM
         // ...split into bytes
         for (int i = 0; i < numBytes; i++) {
-          word toWrite;
+          byte toWrite;
           if (state.length() < 8) {
-            toWrite = state.toInt();
+            toWrite = stringToByte(state);
+            if (lastByteLength == 0) {
+              lastByteLength = state.length();
+            }
           } else {
-            Serial.println(state.substring(0,8));
-            toWrite = state.substring(0,8).toInt();
+            toWrite = stringToByte(state.substring(0,8));
             state = state.substring(8);
-            Serial.println(toWrite);
           }
-        }
-        if (address < noteLimit) {
-          states[address] = state;
-          ticks[address] = tick;
+          EEPROM.write(address, toWrite);
           address++;
         }
+        ticks.push(tick);
       }
-      Serial.println(incomingString);
+      if (incomingString == "&") {
+        fsmState = 2; // switch to Arduino acting mode
+      } else {
+        fsmState = 3; // not done - skip acting mode
+      }
       incomingString = ""; // clear before receiving more data
-      state = 2; // switch to Arduino acting mode
       break;
     }
     
     // 2) Arduino acting mode (w/ writing capability)
     case 2: {
-      state = 3;
+      Serial.println("In state 2");
+      int current = 0;
+      int shift = millis();
+      while (ticks.count() > 0) {
+        int tick = ticks.pop();
+        String state = getState(current);
+        // wait until it's time to play the note
+        while (millis()-shift < tick) {
+          delay(5);
+        }
+        Serial.print(tick);
+        Serial.print("/");
+        Serial.print(millis()-shift);
+        Serial.print("/");
+        Serial.println(state);
+        current++;
+        play(state);
+      }
+      fsmState = 3;
       break;
     }
       
     // 3) DO NOT MODIFY - exists solely to switch the Arduino back to reading mode when it's ready to process more data
     case 3: {
       Serial.print("%");
-      state = 0;
+      fsmState = 0;
       break;
     }
       
@@ -93,4 +119,47 @@ void loop() {
     default:
       break;
   }
+}
+
+byte stringToByte(String s) {
+  int res = 0;
+  int power = 1;
+  int mult;
+  for (int i=s.length(); i > 0; i--) {
+    mult = s.substring(i-1, i).toInt(); // 1 or 0
+    res = res + mult*power;
+    power = power * 2;
+  }
+  return byte(res);
+}
+
+String byteToString(byte b) {
+  int num = int(b);
+  String res = "";
+  int power = 128;
+  for (int i=0; i<8; i++) {
+    if (num >= power) {
+      num = num - power;
+      res = res + "1";
+    } else {
+      res = res + "0";
+    }
+    power = power/2;
+  }
+  return res;
+}
+
+String getState(int stateNum) {
+  String res = "";
+  int startAddress = stateNum * numBytes;
+  int endAddress = startAddress + numBytes - 1;
+  for (int i = startAddress; i < endAddress; i++) {
+    res = res + byteToString(EEPROM.read(i));
+  }
+  String wholeLastByte = byteToString(EEPROM.read(endAddress));
+  return res + wholeLastByte.substring(8-lastByteLength);
+}
+
+void play(String state) {
+  Serial.print("");
 }

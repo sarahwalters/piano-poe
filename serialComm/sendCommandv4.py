@@ -42,10 +42,10 @@ def serialWrapper():
 	batchSize = 10
 
 	# sending
-	while sentIndex <= numNotes+1:
+	while sentIndex <= numNotes + 1:
 		# PYTHON READING BLOCK
 		# print 'Trying to read'
-		inc = ser.read(1000)
+		inc = ser.read(10000)
 		# inc: everything Arduino printed to serial during the last loop()
 		# 	   should always end with '%'
 		# END OF PYTHON READING BLOCK
@@ -55,20 +55,21 @@ def serialWrapper():
 			print inc
 			print '---'
 
+			# PYTHON WRITING BLOCK - send a batch of notes
+			count = 0
+			while count < batchSize and sentIndex < numNotes:
+				ser.write(midiOutput[sentIndex])
+				ser.write('*')
+				sentIndex = sentIndex + 1
+				count = count + 1
+			# END OF PYTHON WRITING BLOCK
 			if sentIndex < numNotes:
-				# PYTHON WRITING BLOCK - send a batch of notes
-				count = 0
-				while count < batchSize and sentIndex < numNotes:
-					ser.write(midiOutput[sentIndex])
-					ser.write('*')
-					sentIndex = sentIndex + 1
-					count = count + 1
-				# END OF PYTHON WRITING BLOCK
-				if sentIndex < numNotes:
-					ser.write('!')
-				else:
-					ser.write('&')
+				ser.write('!')
+			else:
+				ser.write('&')
+				sentIndex = sentIndex + 1 # trigger end of while loop
 
 			# give Arduino serial control
 			ser.write('@')
-			sentIndex = sentIndex + 1
+
+	ser.close()
