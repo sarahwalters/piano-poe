@@ -7,8 +7,9 @@
 
 // INITIALIZATIONS //
 // ... timing
-int minQueueSize = 15;
-int ticksPerSec = 25; // midi time -> second conversion
+int minQueueSize = 16;
+//int ticksPerSec = 25; // midi time -> second conversion MARY
+int ticksPerSec = 40;
 
 // ... for FSM
 int state = 0;
@@ -23,14 +24,23 @@ String noteNames[12] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A
 int lowestNote = 60; // starting at C4 for now
 
 // ... servo stuff
-Servo sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4;
-Servo servos[8] = {sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4}; // in pin order, starting at 2
-int servoEnd[8];
+Servo sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4;
+Servo servos[12] = {sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4}; // in pin order, starting at 2
+int servoEnd[12];
+// FOR REAL THING
 //int onPos[8] = {160, 0, 152, 0, 143, 0, 0, 37};
 //int offPos[8] = {140, 0, 137, 0, 131, 0, 0, 49};
-int onPos[8] = {7, 0, 171, 0, 180, 0, 0, 178};
-int offPos[8] = {18, 0, 163, 0, 168, 0, 0, 168};
-int numServos = 8;
+
+// FOR FOAM PROTOTYPE
+//int onPos[8] = {7, 0, 171, 0, 180, 0, 0, 178};
+//int offPos[8] = {18, 0, 163, 0, 168, 0, 0, 168};
+
+// FOR TESTING
+//int offPos[12] = {28, 0, 16, 0, 22, 11, 180, 169, 180, 163, 180, 156};
+int offPos[12] = {28, 0, 16, 0, 22, 11, 180, 169, 180, 163, 180, 156};
+//int offPos[12] = {90, 90, 90, 90, 90, 90, 180, 180, 180, 180, 180, 180};
+int onPos[12] = {15, 0, 5, 0, 10, 0, 170, 180, 180, 174, 180, 169};
+int numServos = 12;
 
 
 // MAIN FUNCTIONS //
@@ -150,6 +160,7 @@ void loop() {
         Serial.println("START: " + String(leader.getStart()) + "--" + String(ticks()));
         playNotes(currentNotes, stopCounter);
       }
+
       state = 3;
       break;
     }
@@ -200,6 +211,6 @@ void playNotes(Note noteSet[10], int stopIndex) {
     if (keyIndex >= 0 && keyIndex < numServos) {
       servos[keyIndex].write(onPos[keyIndex]); // move the servo
       servoEnd[keyIndex] = noteSet[i].getStart() + noteSet[i].getDuration(); // store the end time
-	}
+	  }
   }	
 }
