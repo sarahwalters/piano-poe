@@ -33,7 +33,7 @@ class MusicReader:
 			notes = self.find_notes(unbarred_line)
 			if notes != None:
 				for note in notes:
-					cv2.imshow('test',note)
+					cv2.imshow('note',note)
 					cv2.waitKey(0)
 					if self.twohanded:
 						hand_notes = self.split_into_lines(note)
@@ -44,11 +44,10 @@ class MusicReader:
 								top_row.append(hand_notes[i])
 							else:
 								bottom_row.append(hand_notes[i])
+						#determine note types, in progress
 						for n in top_row:
-							self.read_note(n)							
-						#determine note type
-						# cv2.imshow('onehand',hand_note)
-						# cv2.waitKey(0)
+							cv2.imshow('topnote',n)
+							cv2.waitKey(0)
 
 	'''
 	Function that takes an input_img with multiple rows and splits it by each row
@@ -152,15 +151,12 @@ class MusicReader:
 		return notes
 
 	def read_note(self, input_img):
-		rows,cols = np.shape(input_img)
-		staff_lines = self.read_staff_lines(input_img)
-		copy = np.uint8(input_img)
-		circles = cv2.HoughCircles(copy, cv.CV_HOUGH_GRADIENT, 1, rows/8, 200, 100, 0, 0 );
-
-		for circle in circles:
-			cv2.circle(input_img,(circle[0],circle[1]),circle[2],(255,255,255),2)
-		cv2.imshow('circle',input_img)
-		cv2.waitKey(0)
+		# TODO: take an input image note and identify it
+		# BOTH AS quarter note/half etc, as well as E,G,F,etc
+		# 
+		# run staff lines on it
+		# find center of black pixels, maybe using meanShift? or HoughCircles?
+		pass
 
 	'''
 	Helper function to split_into_lines
