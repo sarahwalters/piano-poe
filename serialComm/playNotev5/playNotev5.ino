@@ -13,13 +13,15 @@ int lastByteLength = 0; // (num. keys in state) % 8
 int numBytes = 0; // how many bytes of EEPROM for 1 state
 
 // ...for playing
-QueueList<int> ticks;
+QueueList<long> ticks;
+float speedFactor = 3.75;
 
 // ...servos
 Servo sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4;
 Servo servos[12] = {sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4}; // in pin order, starting at 2
-int offPos[12] = {28, 0, 16, 0, 22, 11, 180, 169, 180, 163, 180, 142};
-int onPos[12] = {15, 0, 5, 0, 10, 0, 180, 180, 180, 174, 180, 169};
+int offPos[12] = {28, 0, 16, 0, 22, 11, 180, 169, 180, 163, 180, 130};
+int onPos[12] = {15, 0, 5, 0, 10, 0, 180, 180, 180, 174, 180, 148};
+// 160, 173
 int numServos = 12;
 
 // ...setup
@@ -66,7 +68,7 @@ void loop() {
 
         // ...perform split
         String state = incomingString.substring(0, commaIndex);
-        int tick = incomingString.substring(commaIndex+1, starIndex).toInt();
+        long tick = incomingString.substring(commaIndex+1, starIndex).toInt();
 
         // ...update incomingString
         incomingString = incomingString.substring(starIndex+1);
@@ -109,16 +111,16 @@ void loop() {
     case 2: {
       Serial.println("In state 2");
       int current = 0;
-      int shift = millis();
+      long shift = millis();
       while (ticks.count() > 0) {
-        int tick = ticks.pop();
+        long tick = ticks.pop();
         String state = getState(current);
         // wait until it's time to play the note
-        while (millis()-shift < tick) {
+        while (millis()-shift < tick/speedFactor) {
           delay(5);
         }
         play(state);
-        Serial.print("/");
+        //Serial.print("/");
         Serial.print(tick);
         Serial.print("/");
         Serial.println(millis()-shift);
@@ -192,7 +194,7 @@ String getState(int stateNum) {
 void play(String state) {
   for (int i=0; i < state.length(); i++) {
     int val = state.substring(i,i+1).toInt();
-    Serial.print(val);
+    //Serial.print(val);
     int pos;
     if (val == 1) {
       pos = onPos[i];

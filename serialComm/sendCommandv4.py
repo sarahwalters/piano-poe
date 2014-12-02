@@ -15,7 +15,7 @@ def serialWrapper():
 	# open all serial connections
 	ser = serial.Serial(findPort(), 9600, timeout=1)
 
-	testMidiOutput = ['000000000100000000000,0',
+	'''testMidiOutput = ['000000000100000000000,0',
 					  '000000000000000000000,480',
 					  '000000000100000000000,960',
 					  '000000000000000000000,1440',
@@ -30,11 +30,19 @@ def serialWrapper():
 					  '000000000100000000000,5760',
 					  '000000000000000000000,6240',
 					  '000000010000000000000,6720',
-					  '000000000000000000000,7200']
+					  '000000000000000000000,7200']'''
+
+	testMidiOutput = ['000000000001,0',
+					  '000000000000,480',
+					  '000000000001,960',
+					  '000000000000,1440',
+					  '000000000001,1920',
+					  '000000000000,2400',
+					  '000000000001,2880',
+					  '000000000000,3360',]
 
 	midiOutput = readMidi.readNew('../midiReading/midis/odeToJoy2.mid', 60, 71)
 	#midiOutput = testMidiOutput
-	
 	# pre-sending setup
 	ser.write('@') # give Arduino serial control
 	sentIndex = 0 # runs to numNotes + 1
@@ -45,7 +53,7 @@ def serialWrapper():
 	while sentIndex <= numNotes + 1:
 		# PYTHON READING BLOCK
 		# print 'Trying to read'
-		inc = ser.read(10000)
+		inc = ser.read(100000)
 		# inc: everything Arduino printed to serial during the last loop()
 		# 	   should always end with '%'
 		# END OF PYTHON READING BLOCK
