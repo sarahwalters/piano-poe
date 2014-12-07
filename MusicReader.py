@@ -2,6 +2,20 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 
+class Line:
+	def __init__(self, img, start_row, end_row):
+		self.img = img
+		self.start_row = start_row
+		self.end_row = end_row
+		self.rows,self.cols = np.shape(img)
+		self.staff_lines = []
+
+	def translate_lines(self, all_staff_lines):
+		for sl in all_staff_lines:
+			if (sl > self.start_row) and (sl < self.end_row): #staff line in line
+				self.staff_lines.append(sl-self.start_row)
+		self.staff_lines.sort()
+
 class MusicReader:
 
 	'''
@@ -12,6 +26,7 @@ class MusicReader:
 		self.img = cv2.imread(im_name,0)
 		self.rows, self.cols = np.shape(self.img)
 		self.twohanded = twohanded
+		self.staff_lines = []
 
 	'''
 	Main function that goes through the steps of reading and understanding the music
@@ -22,8 +37,13 @@ class MusicReader:
 	5. identify each note, both letter (E,G,etc) and type (quarter, half, etc)
 	'''
 	def read(self):
+		self.staff_lines, widths = self.read_staff_lines(self.img)
+		print "all staff lines", self.staff_lines
 		lines = self.split_into_lines(self.img)
-		for line in lines:
+		for line_obj in lines:
+			line = line_obj.img
+			line_obj.translate_lines(self.staff_lines)
+			print line_obj.start_row, line_obj.end_row, line_obj.staff_lines
 
 			unbarred_line = self.destroy_non_note_cols(line)
 			cv2.imshow('before',line)
@@ -46,8 +66,7 @@ class MusicReader:
 								bottom_row.append(hand_notes[i])
 						#determine note types, in progress
 						for n in top_row:
-							cv2.imshow('topnote',n)
-							cv2.waitKey(0)
+							self.read_note(n)
 
 	'''
 	Function that takes an input_img with multiple rows and splits it by each row
@@ -77,7 +96,8 @@ class MusicReader:
 								line[r][col] = 0
 							else:
 								line[r][col] = 255
-					lines.append(line)
+					line_obj = Line(line, prev_row, current_row)
+					lines.append(line_obj)
 					prev_row = current_row
 			row = current_row
 		return lines
@@ -98,11 +118,9 @@ class MusicReader:
 			for row in range(rows):
 				if input_img[row][col]==0:
 					total_black_in_col += 1
-			print "col",col,float(total_black_in_col)/rows
 			if float(total_black_in_col)/rows < black_threshold:
 				for row in range(rows):
 					unbarred_img[row][col]=255
-		print "blakc threshold", black_threshold
 		return unbarred_img
 
 	'''
@@ -130,8 +148,6 @@ class MusicReader:
 				if (col+1 - start-1) > 5:
 					boxes.append((start-1,col+1))
 				is_black = False
-
-		print boxes
 
 		for box in boxes:
 			note = np.ones([rows, box[1]-box[0]])
@@ -194,7 +210,6 @@ class MusicReader:
 	def get_black_staff_threshold(self, input_img):
 		rows,cols = np.shape(input_img)
 		staff_lines, widths = self.read_staff_lines(input_img)
-		print staff_lines, widths
 		if staff_lines:
 			avg_width = 2 # 
 			if widths:
@@ -228,8 +243,17 @@ class MusicReader:
 	Only one line per actual staff line ***
 	'''
 	def read_staff_lines(self, input_img):
-		copy = np.uint8(input_img)
+
 		rows,cols = np.shape(input_img)
+		nump_arr = np.zeros([rows,cols])
+		for r in range(rows):
+			for c in range(cols):
+				if input_img[r][c] < 200:
+					nump_arr[r][c] = 0
+				else:
+					nump_arr[r][c] = 255
+
+		copy = np.uint8(nump_arr)
 		edges = cv2.Canny(copy,150,700)
 		lines = cv2.HoughLines(edges,1,np.pi/180,250)
 		staff_lines = []
@@ -253,6 +277,9 @@ class MusicReader:
 						widths.append(abs(y - y1))
 				if not too_close:
 					staff_lines.append((y1))
+		staff_lines.sort()
+		for y in staff_lines:
+			cv2.line(nump_arr,(0,y),(cols,y),(0,0,255),2)
 		return staff_lines, widths
 
 if __name__ == "__main__":
