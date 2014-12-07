@@ -1,28 +1,49 @@
 #include <EEPROM.h>
 #include <QueueList.h>
+#include <Servo.h>
 
+// INITIALIZATIONS & SETUP
+// ...for fsm
 int fsmState = 0;
-String incomingString = "";
+
+// ...for serial comm & writing to EEPROM
 int address = 0;
-QueueList<int> ticks;
-int lastByteLength = 0;
+String incomingString = "";
+int lastByteLength = 0; // (num. keys in state) % 8
 int numBytes = 0; // how many bytes of EEPROM for 1 state
 
+// ...for playing
+QueueList<long> ticks;
+float speedFactor = 3.75;
 
+// ...servos
+Servo sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4;
+Servo servos[12] = {sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4}; // in pin order, starting at 2
+int offPos[12] = {28, 0, 16, 0, 22, 11, 180, 169, 180, 163, 180, 130};
+int onPos[12] = {15, 0, 5, 0, 10, 0, 180, 180, 180, 174, 180, 148};
+// 160, 173
+int numServos = 12;
+
+// ...setup
 void setup() {
-  Serial.begin(9600); // set up Serial library at 9600 bps
-  for (int i=0; i < 1000; i++) {
-    EEPROM.write(i, B0);
+  Serial.begin(9600); // set up serial at 9600 baud
+
+  // attach all servos to pins and set to default positions
+  for (int i=0; i<numServos; i++) {
+    int pin = i+2;
+    servos[i].attach(pin);
+    servos[i].write(offPos[i]);
   }
 }
 
 
+// MAIN FSM METHOD
 void loop() {
   switch(fsmState) {
-    // 0) Arduino reading mode
+    // CASE 0 = Arduino reading mode
     case 0: {
       if (Serial.available() > 0) {
-      	// get what Python sent
+      	// get one char from what Python sent
         int incoming = Serial.read();
 
         // was it end character?
@@ -35,7 +56,7 @@ void loop() {
       break;
     }
     
-    // 1) Arduino processing mode (w/ writing capability)
+    // CASE 1 = Arduino processing mode (w/ writing capability)
     case 1: {
       Serial.println("In state 1");
       Serial.println(incomingString);
@@ -47,7 +68,7 @@ void loop() {
 
         // ...perform split
         String state = incomingString.substring(0, commaIndex);
-        int tick = incomingString.substring(commaIndex+1, starIndex).toInt();
+        long tick = incomingString.substring(commaIndex+1, starIndex).toInt();
 
         // ...update incomingString
         incomingString = incomingString.substring(starIndex+1);
@@ -57,18 +78,20 @@ void loop() {
           numBytes = state.length()/8 + 1; // how many bytes of EEPROM for 1 state
         }
 
-        // store state to EEPROM
-        // ...split into bytes
+        // store size of "remainder" last byte, to reconstruct state later
+        if (lastByteLength == 0) {
+          lastByteLength = state.length() % 8;
+        }
+
+        // store state to EEPROM, byte by byte
         for (int i = 0; i < numBytes; i++) {
           byte toWrite;
+          // get one byte (or less)
           if (state.length() < 8) {
-            toWrite = stringToByte(state);
-            if (lastByteLength == 0) {
-              lastByteLength = state.length();
-            }
+            toWrite = stringToByte(state); // less than a byte
           } else {
-            toWrite = stringToByte(state.substring(0,8));
-            state = state.substring(8);
+            toWrite = stringToByte(state.substring(0,8)); // get one byte
+            state = state.substring(8); // & update state
           }
           EEPROM.write(address, toWrite);
           address++;
@@ -84,31 +107,33 @@ void loop() {
       break;
     }
     
-    // 2) Arduino acting mode (w/ writing capability)
+    // CASE 2 = Arduino acting mode (w/ writing capability)
     case 2: {
       Serial.println("In state 2");
       int current = 0;
-      int shift = millis();
+      long shift = millis();
       while (ticks.count() > 0) {
-        int tick = ticks.pop();
+        long tick = ticks.pop();
         String state = getState(current);
         // wait until it's time to play the note
-        while (millis()-shift < tick) {
+        while (millis()-shift < tick/speedFactor) {
           delay(5);
         }
+        play(state);
+        //Serial.print("/");
         Serial.print(tick);
         Serial.print("/");
-        Serial.print(millis()-shift);
-        Serial.print("/");
-        Serial.println(state);
+        Serial.println(millis()-shift);
+        
         current++;
-        play(state);
+        
       }
       fsmState = 3;
       break;
     }
       
-    // 3) DO NOT MODIFY - exists solely to switch the Arduino back to reading mode when it's ready to process more data
+    // CASE 3 = DO NOT MODIFY - exists solely to switch the Arduino back to reading mode 
+    //          when it's ready to process more data
     case 3: {
       Serial.print("%");
       fsmState = 0;
@@ -121,6 +146,8 @@ void loop() {
   }
 }
 
+
+// BYTE/STRING CONVERSION
 byte stringToByte(String s) {
   int res = 0;
   int power = 1;
@@ -149,6 +176,8 @@ String byteToString(byte b) {
   return res;
 }
 
+
+// PARSING EEPROM
 String getState(int stateNum) {
   String res = "";
   int startAddress = stateNum * numBytes;
@@ -160,6 +189,18 @@ String getState(int stateNum) {
   return res + wholeLastByte.substring(8-lastByteLength);
 }
 
+
+// INTERFACING W/ SERVOS
 void play(String state) {
-  Serial.print("");
+  for (int i=0; i < state.length(); i++) {
+    int val = state.substring(i,i+1).toInt();
+    //Serial.print(val);
+    int pos;
+    if (val == 1) {
+      pos = onPos[i];
+    } else {
+      pos = offPos[i];
+    }
+    servos[i].write(pos);
+  }
 }

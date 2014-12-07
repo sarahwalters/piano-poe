@@ -93,12 +93,14 @@ def readNew(midiFile, startKey, stopKey):
 
 	# PARSE NOTES
 	time = 0
-	states = []
 	keyboardArray = [0]*(stopKey-startKey+1)
-	leftoverTick = 0
+	noteOns = []
+	noteOffs = []
+	lastOnTick = -1
+	lastOffTick = -1
 
-	# make a string for every on/off change
-	for noteObj in noteObjects:
+	# make on and off states for every on/off change
+	for i, noteObj in enumerate(noteObjects):
 		updated = False
 
 		# update state of keyboardArray?
@@ -106,25 +108,76 @@ def readNew(midiFile, startKey, stopKey):
 		isNoteOff = isinstance(noteObj, midi.events.NoteOffEvent)
 
 		if isNoteOn or isNoteOff:
-			
-			
-
 			# if note is valid, update state...
 			keyboardIndex = noteObj.data[0]-startKey
 			if keyboardIndex in range(0, len(keyboardArray)):
+				# ..add to keyboardArray
 				if isNoteOn:
 					keyboardArray[keyboardIndex] = 1
-					time = time + noteObj.tick + leftoverTick
+					time = time + noteObj.tick
 					leftoverTick = 0
 				else:
 					keyboardArray[keyboardIndex] = 0
 					durationProportion = 0.5
-					time = time + durationProportion*noteObj.tick
-					leftoverTick = (1-durationProportion)*noteObj.tick
+					time = time + noteObj.tick
 
-				# ...and make a new state string
+				# ...make new state array
 				newState = ''.join(map(str, keyboardArray))
-				states.append(newState+","+ str(int(time)))
+				timeInt = int(time)
+				
 
+				if isNoteOn:
+					if timeInt == lastOnTick:
+						noteOns[-1] = (newState, timeInt)
+					else:
+						noteOns.append((newState, timeInt))
+						lastOnTick = timeInt
+				else:
+					if timeInt == lastOffTick:
+						noteOffs[-1] = (newState, timeInt)
+					else:
+						noteOffs.append((newState, timeInt))
+						lastOffTick = timeInt
+
+	# collect states into single array containing ons and offs
+	iOn = 0
+	iOff = 0
+	nextOnTick = -1
+	nextOffTick = -1
+	states = []
+	while iOn < len(noteOns) or iOff < len(noteOffs):
+		#print str(iOn) + ' -> ' + str(len(noteOns))
+		#print str(iOff) + ' -> ' + str(len(noteOffs))
+
+		if iOn < len(noteOns):
+			nextOnTick = noteOns[iOn][1]
+		else:
+			nextOnTick = None
+
+		if iOff < len(noteOffs):
+			nextOffTick = noteOffs[iOff][1]
+		else:
+			nextOffTick = None
+
+		if (nextOnTick < nextOffTick and nextOnTick > -1) or (nextOffTick == None):
+			# next on comes first
+			states.append(noteOns[iOn][0] + ',' + str(noteOns[iOn][1]))
+			iOn = iOn + 1
+
+		elif (nextOffTick < nextOnTick and nextOffTick > -1) or (nextOnTick == None):
+			# next off comes first
+			states.append(noteOffs[iOff][0] + ',' + str(noteOffs[iOff][1]))
+			iOff = iOff + 1
+
+		elif nextOffTick == nextOnTick and nextOffTick > -1:
+			# scheduled for the same time - space out for servos
+			if iOn-1 > 0:
+				diff = noteOns[iOn][1] - noteOns[iOn-1][1]
+			else:
+				diff = noteOns[iOn+1][1] - noteOns[iOn][1]
+			states.append(noteOffs[iOff][0] + ',' + str(noteOffs[iOff][1]-diff/2))
+			states.append(noteOns[iOn][0] + ',' + str(noteOns[iOn][1]))
+			iOn = iOn + 1
+			iOff = iOff + 1
 
 	return states
