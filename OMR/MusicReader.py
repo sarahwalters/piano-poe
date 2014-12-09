@@ -37,13 +37,15 @@ class MusicReader:
 	5. identify each note, both letter (E,G,etc) and type (quarter, half, etc)
 	'''
 	def read(self):
+		i=0
 		self.staff_lines, widths = self.read_staff_lines(self.img)
 		print "all staff lines", self.staff_lines
 		lines = self.split_into_lines(self.img)
 		for line_obj in lines:
 			line = line_obj.img
-			line_obj.translate_lines(self.staff_lines)
-			print line_obj.start_row, line_obj.end_row, line_obj.staff_lines
+			line_obj.translate_lines(self.staff_lines) # tells line object which lines belong to it
+
+			print "full line", line_obj.start_row, line_obj.end_row, line_obj.staff_lines
 
 			unbarred_line = self.destroy_non_note_cols(line)
 			cv2.imshow('before',line)
@@ -53,20 +55,25 @@ class MusicReader:
 			notes = self.find_notes(unbarred_line)
 			if notes != None:
 				for note in notes:
-					cv2.imshow('note',note)
-					cv2.waitKey(0)
 					if self.twohanded:
-						hand_notes = self.split_into_lines(note)
-						top_row = []
-						bottom_row = []
-						for i in range(len(hand_notes)):
-							if i%2==0:
-								top_row.append(hand_notes[i])
-							else:
-								bottom_row.append(hand_notes[i])
-						#determine note types, in progress
-						for n in top_row:
-							self.read_note(n)
+						#hand_notes = self.split_into_lines(note)
+						if len(line_obj.staff_lines) == 10:
+							top_line_bottom_row = line_obj.staff_lines[5]
+
+							top_obj, bottom_obj = self.split_at_row(note, top_line_bottom_row-10)
+
+							self.prep_note(top_obj,line_obj.staff_lines,"top",i)
+							self.prep_note(bottom_obj,line_obj.staff_lines,"bottom",i)
+							i+=1
+
+
+	def prep_note(self,input_obj, staff_lines, desc,i):
+		img = input_obj.img
+		rows,cols = np.shape(img)
+		input_obj.translate_lines(staff_lines)
+		print desc, input_obj.start_row, input_obj.end_row, input_obj.staff_lines
+		cv2.imwrite("../images/notes/"+desc+str(i)+".png",img)
+		#cv2.waitKey(0)
 
 	'''
 	Function that takes an input_img with multiple rows and splits it by each row
@@ -92,7 +99,7 @@ class MusicReader:
 					line = np.zeros([current_row - prev_row, cols])
 					for r in range(current_row - prev_row):
 						for col in range(cols):
-							if input_img[r+prev_row][col] < 200:
+							if input_img[r+prev_row][col] < 100:
 								line[r][col] = 0
 							else:
 								line[r][col] = 255
@@ -101,6 +108,28 @@ class MusicReader:
 					prev_row = current_row
 			row = current_row
 		return lines
+
+	def split_at_row(self, input_img, row):
+		rows,cols = np.shape(input_img)
+
+		line1 = np.zeros([row, cols])
+		line2 = np.zeros([rows-row, cols])
+		for r1 in range(row):
+			for c1 in range(cols):
+				if input_img[r1][c1] < 100:
+					line1[r1][c1] = 0
+				else:
+					line1[r1][c1] = 255
+		line1_obj = Line(line1, 0, row)
+		for r2 in range(row,rows):
+			for c2 in range(cols):
+				if input_img[r2][c2] == 0:
+					line2[r2-row][c2] = 0
+				else:
+					line2[r2-row][c2] = 255
+		line2_obj = Line(line2, row, rows)
+
+		return line1_obj, line2_obj
 
 	'''
 	Takes an input image (line) and goes through each column
@@ -283,5 +312,5 @@ class MusicReader:
 		return staff_lines, widths
 
 if __name__ == "__main__":
-	mr = MusicReader("./images/ode_to_joy.png", True)
+	mr = MusicReader("../images/ode_to_joy.png", True)
 	mr.read()
