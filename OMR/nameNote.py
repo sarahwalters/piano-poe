@@ -91,28 +91,32 @@ def find_stems(image):
                     num_stems = num_stems + 1
                     #add the stem to a list to divide images
                     divisions.append(current_stem)
+    else:
+        num_stems = 0
     
     # cv2.imshow('test', image)
     # cv2.waitKey(0)
     if len(divisions) > 1:
         images = []
         start = 0
-        for x in divisions:
+        splitting = [0] + divisions + [len(image[0])]
+        for x in splitting:
             end = x + 5
             segment = image[0:len(image[0]), start:x]
-            images.append(segment)
+            if 0 in segment:
+                images.append(segment)
+                cv2.imshow('test', segment)
+                cv2.waitKey(0)
             start = x
             #TODO: add in protection for dealing with stems on the left side of the note (probably if black switch to next line as divider)
-            # cv2.imshow('test', segment)
-            # cv2.waitKey(0)
+
 
     else:
-        num_stems = 0
-        images = len[image]
+        images = [image]
 
 
     print len(images)
-    return image
+    return images, num_stems
 
 
 
@@ -122,7 +126,7 @@ def isolate_center(image):
     Uses these pixels to estimate the center of the note using mean_shift
 
     inputs: 
-        image -> file path for the binary image
+        image -> numpy array for the binary image
     returns:
         center -> the center of mass of the note
     """
@@ -140,11 +144,39 @@ def isolate_center(image):
     center = mean_shift((100, 46), points, 0.25)
     return center
 
+def name_note(image):
+    """
+        Takes in a note or set of quarter notes and outputs a name and a duration
+
+        inputs:
+            image -> numpy array of a binary image
+        returns:
+            name -> list of note names
+            duration -> list of note durations
+    """
+    images, num_stems = find_stems(image)
+    raw_note = []
+    duration = []
+    for index in range(len(images)):
+        center = isolate_center(images[index])
+        if num_stems == 0:
+            duration.append(100)
+        elif num_stems > 1:
+            duration.append(12.5)
+        elif images[index][center] == 0:
+            duration.append(25)
+        else:
+            duration.append(50)
+    print(duration)
+
+
+
 if __name__ == '__main__':
-    im = cv2.imread('../images/lonely_quarters.png', 0)
-    image = find_stems(im)
+    im = cv2.imread('../images/note3.png', 0)
+    # image = find_stems(im)
     # show_im = cv2.imread('../images/note3.png')
-    center = isolate_center(im)
+    # center = isolate_center(im)
+    name_note(im)
 
     # cv2.circle(image, (center[1], center[0]), 4, (255, 255, 255))
     # cv2.imshow('test', image)
