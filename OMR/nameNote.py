@@ -73,7 +73,8 @@ def find_stems(image):
     for x in range(len(image[0])):
         column = image[0:len(image), x]
         stem_length = len(column) - sum(column)/255
-        if stem_length >= 45:
+        # print stem_length
+        if stem_length >= 25:
             stems.append(x)
 
     #removing stems and counting their number
@@ -93,22 +94,21 @@ def find_stems(image):
                     divisions.append(current_stem)
     else:
         num_stems = 0
+        divisions = []
     
     # cv2.imshow('test', image)
     # cv2.waitKey(0)
     if len(divisions) > 1:
         images = []
-        start = 0
         splitting = [0] + divisions + [len(image[0])]
-        for x in splitting:
-            end = x + 5
-            segment = image[0:len(image[0]), start:x]
+        for index in range(len(splitting)-1):
+            start = splitting[index]
+            end = splitting[index+1]+5
+            segment = image[0:len(image), start:end]
             if 0 in segment:
                 images.append(segment)
                 cv2.imshow('test', segment)
                 cv2.waitKey(0)
-            start = x
-            #TODO: add in protection for dealing with stems on the left side of the note (probably if black switch to next line as divider)
 
 
     else:
@@ -160,19 +160,22 @@ def name_note(image):
     for index in range(len(images)):
         center = isolate_center(images[index])
         if num_stems == 0:
-            duration.append(100)
+            if images[index][center] == 0:
+                duration.append('whole rest')
+            else:    
+                duration.append('whole note')
         elif num_stems > 1:
-            duration.append(12.5)
+            duration.append('eighth note')
         elif images[index][center] == 0:
-            duration.append(25)
+            duration.append('quarter note')
         else:
-            duration.append(50)
+            duration.append('half note')
     print(duration)
 
 
 
 if __name__ == '__main__':
-    im = cv2.imread('../images/note3.png', 0)
+    im = cv2.imread('../images/notes/top32.png', 0)
     # image = find_stems(im)
     # show_im = cv2.imread('../images/note3.png')
     # center = isolate_center(im)
