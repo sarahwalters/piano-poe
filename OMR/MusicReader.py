@@ -2,6 +2,11 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 
+'''
+Line class is some sub-image that contains staff lines
+It is used to represent either full lines of music, or each
+individual note
+'''
 class Line:
 	def __init__(self, img, start_row, end_row):
 		self.img = img
@@ -10,6 +15,10 @@ class Line:
 		self.rows,self.cols = np.shape(img)
 		self.staff_lines = []
 
+	'''
+	Given "global" indices for staff lines, translate them to "local"
+	indices relative to this sub-image
+	'''
 	def translate_lines(self, all_staff_lines):
 		for sl in all_staff_lines:
 			if (sl > self.start_row) and (sl < self.end_row): #staff line in line
@@ -66,14 +75,17 @@ class MusicReader:
 							self.prep_note(bottom_obj,line_obj.staff_lines,"bottom",i)
 							i+=1
 
-
-	def prep_note(self,input_obj, staff_lines, desc,i):
+	'''
+	Given a Line object for a note, prepares it to be read, saves it, etc
+	'''
+	def prep_note(self, input_obj, staff_lines, desc,i):
 		img = input_obj.img
 		rows,cols = np.shape(img)
 		input_obj.translate_lines(staff_lines)
 		print desc, input_obj.start_row, input_obj.end_row, input_obj.staff_lines
-		cv2.imwrite("../images/notes/"+desc+str(i)+".png",img)
-		#cv2.waitKey(0)
+		#cv2.imwrite("../images/notes/"+desc+str(i)+".png",img)
+		cv2.imshow(desc, img)
+		cv2.waitKey(0)
 
 	'''
 	Function that takes an input_img with multiple rows and splits it by each row
@@ -109,6 +121,9 @@ class MusicReader:
 			row = current_row
 		return lines
 
+	'''
+	Given an input image and a row, splits the image into two at that row
+	'''
 	def split_at_row(self, input_img, row):
 		rows,cols = np.shape(input_img)
 
@@ -284,7 +299,7 @@ class MusicReader:
 
 		copy = np.uint8(nump_arr)
 		edges = cv2.Canny(copy,150,700)
-		lines = cv2.HoughLines(edges,1,np.pi/180,250)
+		lines = cv2.HoughLines(edges,1,np.pi/180,300)
 		staff_lines = []
 		widths = []
 		if lines != None:   
@@ -309,8 +324,10 @@ class MusicReader:
 		staff_lines.sort()
 		for y in staff_lines:
 			cv2.line(nump_arr,(0,y),(cols,y),(0,0,255),2)
+		#cv2.imshow('lines',nump_arr)
+		#cv2.waitKey(0)
 		return staff_lines, widths
 
 if __name__ == "__main__":
-	mr = MusicReader("../images/ode_to_joy.png", True)
+	mr = MusicReader("../images/winter_wonderland.png", True)
 	mr.read()
