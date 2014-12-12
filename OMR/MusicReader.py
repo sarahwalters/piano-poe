@@ -2,6 +2,8 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 
+from nameNote import get_note_type
+
 '''
 Line class is some sub-image that contains staff lines
 It is used to represent either full lines of music, or each
@@ -24,6 +26,48 @@ class Line:
 			if (sl > self.start_row) and (sl < self.end_row): #staff line in line
 				self.staff_lines.append(sl-self.start_row)
 		self.staff_lines.sort()
+
+	def calc_2_lines_below(self):
+		sum_dists = 0
+		for i in range(len(self.staff_lines)-1):
+			sum_dists += self.staff_lines[i+1] - self.staff_lines[i]
+		avg_dist = (sum_dists)/(len(self.staff_lines)-1)
+		self.staff_lines.append(self.staff_lines[len(self.staff_lines)-1] + avg_dist)
+		self.staff_lines.append(self.staff_lines[len(self.staff_lines)-1] + avg_dist)
+		self.staff_lines.append(self.staff_lines[len(self.staff_lines)-1] + avg_dist)
+
+
+	def make_slots(self):
+		note_slots = {}
+		line_notes = ['F5','D5','B4','G4','E4','C4','A3']
+		space_notes = ['E5','C5','A4','F4','D4','B3','G3']
+		all_notes = ['F5','E5','D5','C5','B4','A4','G4','F4','E4','D4','C4','B3','A3']
+		count = 0
+
+		for i in range(len(self.staff_lines)-1):
+			# next_line = 0
+			# try:
+			# 	next_line = self.staff_lines[i+1]
+			# except:
+			# 	next_line = self.staff_lines[i] + avg_dist
+			y = self.staff_lines[i]
+			space_between = self.staff_lines[i+1] - self.staff_lines[i]
+			r = range(y-(space_between/4), y+(space_between/4)+1)
+			note_slots[line_notes[i]] = r
+
+			r2 = range(y+(space_between/4), y+(3*space_between/4))
+			note_slots[space_notes[i]] = r2
+		self.note_slots = note_slots
+
+	def get_note_name(self,center):
+		if center == None:
+			return None
+		else:
+			note_y = center[0]
+			for name in self.note_slots:
+				r = self.note_slots[name]
+				if note_y in r:
+					return name
 
 class MusicReader:
 
@@ -59,8 +103,6 @@ class MusicReader:
 			unbarred_line = self.destroy_non_note_cols(line)
 			cv2.imshow('before',line)
 			cv2.waitKey(0)
-			cv2.imshow('test',unbarred_line)
-			cv2.waitKey(0)
 			notes = self.find_notes(unbarred_line)
 			if notes != None:
 				for note in notes:
@@ -82,7 +124,17 @@ class MusicReader:
 		img = input_obj.img
 		rows,cols = np.shape(img)
 		input_obj.translate_lines(staff_lines)
+		input_obj.calc_2_lines_below()
+		input_obj.make_slots()
 		print desc, input_obj.start_row, input_obj.end_row, input_obj.staff_lines
+		
+		duration, center = get_note_type(input_obj.img)
+		print center
+		#cimg = cv2.cvtColor(input_obj.img, cv.CV_GRAY2RGB)
+		if center != None:
+			cv2.circle(input_obj.img,(center[1],center[0]),2,(0,0,255),3)
+
+		print duration, input_obj.get_note_name(center)
 		#cv2.imwrite("../images/notes/"+desc+str(i)+".png",img)
 		cv2.imshow(desc, img)
 		cv2.waitKey(0)
@@ -322,8 +374,9 @@ class MusicReader:
 				if not too_close:
 					staff_lines.append((y1))
 		staff_lines.sort()
-		for y in staff_lines:
-			cv2.line(nump_arr,(0,y),(cols,y),(0,0,255),2)
+		for i in range(len(staff_lines)-1):
+			staff_lines[i] = staff_lines[i] + 1
+			#cv2.line(nump_arr,(0,staff_lines[i]),(cols,staff_lines[i]),(0,0,255),1)
 		#cv2.imshow('lines',nump_arr)
 		#cv2.waitKey(0)
 		return staff_lines, widths

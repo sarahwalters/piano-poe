@@ -98,24 +98,35 @@ def find_stems(image):
     
     # cv2.imshow('test', image)
     # cv2.waitKey(0)
-    if len(divisions) > 1:
+
+    segment = None
+
+    if len(divisions) > 0:
         images = []
         splitting = [0] + divisions + [len(image[0])]
         for index in range(len(splitting)-1):
-            start = splitting[index]
-            end = splitting[index+1]+5
+            start = splitting[index]+5
+            end = splitting[index+1]-2
             segment = image[0:len(image), start:end]
             if 0 in segment:
                 images.append(segment)
-                cv2.imshow('test', segment)
-                cv2.waitKey(0)
+                
+
+    if len(divisions) > 1:
+    	segment = image[len(image)/4:3*len(image)/4, 0:len(image[0])]
+
+    cv2.imshow('test', segment)
+    cv2.waitKey(0)
+
+    #else:
+   	# 	segment = image[0:len(image), start:end]
 
 
-    else:
+    if len(divisions)==0:
         images = [image]
 
 
-    print len(images)
+    #print len(images)
     return images, num_stems
 
 
@@ -141,10 +152,10 @@ def isolate_center(image):
     center_row = len(image)/2 
     center_col = len(image[0])/2
     center = (center_row, center_col)
-    center = mean_shift((100, 46), points, 0.25)
+    center = mean_shift((100, 46), points, 0.005)
     return center
 
-def name_note(image):
+def get_note_type(image):
     """
         Takes in a note or set of quarter notes and outputs a name and a duration
 
@@ -157,20 +168,24 @@ def name_note(image):
     images, num_stems = find_stems(image)
     raw_note = []
     duration = []
+    center = None
     for index in range(len(images)):
         center = isolate_center(images[index])
-        if num_stems == 0:
-            if images[index][center] == 0:
-                duration.append('whole rest')
-            else:    
-                duration.append('whole note')
-        elif num_stems > 1:
-            duration.append('eighth note')
-        elif images[index][center] == 0:
-            duration.append('quarter note')
+        if center == None:
+        	duration.append('null')
         else:
-            duration.append('half note')
-    print(duration)
+	        if num_stems == 0:
+	            if images[index][center] == 0:
+	                duration.append('whole rest')
+	            else:    
+	                duration.append('whole note')
+	        elif num_stems > 1:
+	            duration.append('eighth note')
+	        elif images[index][center] == 0:
+	            duration.append('quarter note')
+	        else:
+	            duration.append('half note')
+    return duration, center
 
 
 
@@ -179,7 +194,7 @@ if __name__ == '__main__':
     # image = find_stems(im)
     # show_im = cv2.imread('../images/note3.png')
     # center = isolate_center(im)
-    name_note(im)
+    get_note_type(im)
 
     # cv2.circle(image, (center[1], center[0]), 4, (255, 255, 255))
     # cv2.imshow('test', image)
