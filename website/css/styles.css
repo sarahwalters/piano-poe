@@ -236,12 +236,24 @@ iPhone Section
 .iphone { width: 50%; background: #f3f5f8; float: left; height: 100%; box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -moz-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -webkit-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); z-index: 1; }
 .fluid-white { width: 50%; background: #fff; float: right; height: 100%; z-index: 2; }
 .responsive-services { position: relative; }
+/*===========================================================================*/
+.detailed { width: 50%; background: #f3f5f8; float: left; height: 100%; box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -moz-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -webkit-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); z-index: 1; }
+.fluid-white3 { width: 50%; background: #fff; float: right; height: 100%; z-index: 2; }
+.responsive-services3 { position: relative; }
+
 /* ==========================================================================
 iPhone2 Section
 ========================================================================== */
 .iphone2 { width: 50%; background: #f3f5f8; float: right; height: 100%; box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -moz-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -webkit-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); z-index: 1; }
 .fluid-white2 { width: 50%; background: #fff; float: left; height: 100%; z-index: 2; }
 .responsive-services2 { position: relative; }
+
+/* ==========================================================================
+========================================================================== */
+.detailed2 { width: 50%; background: #f3f5f8; float: right; height: 100%; box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -moz-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); -webkit-box-shadow: inset -15px -11px 40px -6px rgba(0, 0, 0, 0.1); z-index: 1; }
+.fluid-white2 { width: 50%; background: #fff; float: left; height: 100%; z-index: 2; }
+.responsive-services2 { position: relative; }
+/* ==========================================================================
 /* ==========================================================================
 Swag
 ========================================================================== */

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PianoBot - Software</title>
+    <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/flexslider.css" rel="stylesheet" >
+    <link href="css/styles.css" rel="stylesheet">
+    <link href="css/queries.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+      </head>
+      <body id="top">
+        <header id="home">
+          
+         <section class="swag text-center" id="features">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-8 col-md-offset-2">
+                <h1>Software System<span>subtitle here</span></h1>
+                <a href="./index.html" class="down-arrow-btn"><i class="fa fa-chevron-left"></i></a>
+              </div>
+            </div>
+          </div>
+        </section>
+        </header>
+        
+
+      
+        <section class="intro text-center section-padding" id="intro">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-8 col-md-offset-2 wp1">
+                <h1 class="arrow">Software Overview</h1>
+                <p>When we were scoping our project, we were unsure of how well we would be able to use
+                computer vision to read sheet music accurately and robustly.  Therefore, we decided to consider
+                sheet music reading a stretch goal, and have the backup plan be reading notes from MIDI files.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services3">
+            <div class="wrapper">
+              <div class="detailed">
+                <img src="./img/codesystemdiagram.png">
+              </div>
+              <div class="fluid-white"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-7">
+                  <div id="servicesSlider">
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">Code System Diagram</h1>
+                        <p>Our code has two possible pipelines that reads music into notes playable by our Arduino, either
+                        using computer vision to find notes in an image file, or reading them from a MIDI file.</p>
+                        <p>MIDI files are format that carries musical information, and we were able to use a python library to
+                        unpack the information contained therein so we could reformat them for the Arduino.</p>
+                        <p>The sheet music reading uses computer vision and the OpenCV package for python to look through a
+                        full sheet of music for notes, and identify them.</p>
+                        <p>Both methods identify notes in a way that we can compile them into binary keyboard states.
+                        We represent each key as a binary digit, and at each timestep use the notes list to decide whether
+                        each key should be on or off.  These states are read by the Arduino to convert to discrete motor commands.</p>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services3">
+            <div class="wrapper">
+              <div class="detailed2">
+                <img src="./img/staff_lines.png">
+              </div>
+              <div class="fluid-white2"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-0">
+                  <div id="servicesSlider2">
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">MIDI File Reading</h1>
+                        <p>SARAH WRITES HERE ABOUT HOW TO READ MIDI FILE</p>
+                      </li>
+                      
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services3">
+            <div class="wrapper">
+              <div class="detailed">
+                <img src="./img/staff_lines.png">
+              </div>
+              <div class="fluid-white"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-7">
+                  <div id="servicesSlider">
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">Note Isolation Process</h1>
+                        <p>First, we convert a PDF of the sheet music into a PNG image file capable of being read by OpenCV in Python.
+                        Next, we search through the entire image and use the HoughLines algorithm to find and save the y-location of
+                        every staff line within the image (shown as the thick lines to the left)</p>
+                        <p>Next, we split the image into several images for each line of music, in the process destroying the staff lines and
+                        leaving only the notes behind.  Since we've saved the staff line locations, we will be able to identify notes still.</p>
+                        <img src="./img/single_line.png" width=500>
+                        <p>Next, we use a connectivity search by traversing a line of music column by column, checking if it contains any black
+                        pixels.  Columns that contain black pixels are cropped out and grouped together as note objects.</p>
+
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services3">
+            <div class="wrapper">
+              <div class="detailed2">
+                <img src="./img/staff_lines.png">
+              </div>
+              <div class="fluid-white2"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-0">
+                  <div id="servicesSlider2">
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">Note Identification Process</h1>
+                        <p>After we have eliminated whitespace columns and group note objects, we have two notes, a left-handed note and a right-handed note, which we then split in half by cropping the image to get two separate notes.</p>
+                        <p>We then send each through a mean-shift algorithm which finds the 
+                        center of mass of black pixels in the image, which we consider to be the center of the note.  This algorithm checks if the center
+                        is black or white to distinguish between half and quarter notes, and checks for the existence of a stem to distinguish between
+                        whole and half notes.  If it detects more than one note in the image (in a group of eighth notes), it breaks them apart and finds each
+                        center individually.</p>
+                        <p>We compare the location of the center to the locations of the staff lines to find whether the note is on or between lines, and which ones.  From there, we have the note name (C5, E4, B3...) and the duration (half, quarter, ...).</p>
+                      </li>
+                      
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services3">
+            <div class="wrapper">
+              <div class="detailed">
+                <img src="./img/arduinodiagram.png">
+              </div>
+              <div class="fluid-white"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-7">
+                  <div id="servicesSlider">
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">Reading Note Input with Arduino</h1>
+                        <p>SARAH WRITES HERE ARDUINO STUFF</p>
+
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="ignite-cta text-center">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-12">
+                <a href="https://github.com/sarahwalters/piano-poe" class="ignite-btn">View the Source</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/waypoints.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/scripts.js"></script>
+        <script src="js/jquery.flexslider.js"></script>
+        <script src="js/modernizr.js"></script>
+      </body>
+    </html>

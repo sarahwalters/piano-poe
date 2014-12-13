@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PianoBot - Mechanical</title>
+    <title>PianoBot</title>
     <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
@@ -28,12 +28,11 @@
                   <nav class="pull">
                     <ul class="top-nav">
                       <li><a href="#intro">Introduction <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
-                      <li><a href="#overview">Overview <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
-                      <li><a href="#features">Features <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
-                      <li><a href="#responsive">Electrical <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
-                      <li><a href="#portfolio">Software <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
+                      <li><a href="#overview">Features <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
+                      <li><a href="mechanical.html">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mechanical <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
+                      <li><a href="electrical.html">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Electrical <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
+                      <li><a href="software.html">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Software <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
                       <li><a href="#team">Team <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
-                      <li><a href="#contact">More <span class="indicator"><i class="fa fa-angle-right"></i></span></a></li>
                     </ul>
                   </nav>
                 </div>
@@ -66,7 +65,16 @@
             <div class="row">
               <div class="col-md-8 col-md-offset-2 wp1">
                 <h1 class="arrow">The Design, Manufacturing, and Implementation of a Piano-Playing Robot</h1>
-                <p>OVERVIEW HERE Sed a lorem quis neque interdum <a href="#">consequat ut sed sem</a>. Duis quis tempor nunc. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent id tempor ipsum. Fusce at massa ac nunc porta fringilla sed eget neque. Quisque quis pretium nulla. Fusce eget bibendum neque, vel volutpat augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+                <p>PianoBot is an autonomous system that takes a sheet music of MIDI sound file input and uses that to play the song using a series of hand-inspired actuators to depress the keys. </p>
+                <p>Our goals for this project were as follows:</p>
+                  <li>To play at least one octave of music from a MIDI file</li>
+                  <li>To do so in a way that does not damage the keyboard we are using</li>
+                <p>Stretch goals for the project included:</p>
+                  <li>To play sharps and flats</li>
+                  <li>To play multiple octaves</li>
+                  <li>To play multiple notes at once</li>
+                  <li>To take in PDF sheet music as an input and read using computer vision</li>
+                <p>This project was an eight-week undertaking for the Olin College Principles of Engineering class in Fall 2014.</p>
                 <img src="./img/iphone-bg.png">
               </div>
             </div>
@@ -82,7 +90,7 @@
             </div>
           </div>
         </section>
-        <section class="features text-center section-padding" id="overview">
+        <!--<section class="features text-center section-padding" id="overview">
           <div class="container">
             <div class="row">
               <div class="col-md-12">
@@ -122,7 +130,7 @@
               </div>
             </div>
           </div>
-        </section>
+        </section>-->
 
 <!--
 
@@ -169,6 +177,34 @@
               <div id="portfolioSlider">
                 <ul class="slides">
                   <li>
+                    <div class="col-md-4 wp4 delay-1s">
+                      <div class="overlay-effect effects clearfix">
+                        <div class="img">
+                          <img src="img/ode_to_joy.png" alt="Portfolio Item">
+                          <div class="overlay">
+                            <a href="./software.html" class="expand"><i class="fa fa-search"></i><br>View More</a>
+                            <a class="close-overlay hidden">x</a>
+                          </div>
+                        </div>
+                      </div>
+                      <h2><i class="fa fa-code"></i> Software Systems</h2>
+                      <p>The software system consists of two main parts: reading/sending notes in Python and Arduino 
+                      code to actuate the servos and play the notes.</p>
+                    </div>
+                    <div class="col-md-4 wp4 delay-05s">
+                      <div class="overlay-effect effects clearfix">
+                        <div class="img">
+                          <img src="img/portfolio-02.jpg" alt="Portfolio Item">
+                          <div class="overlay">
+                            <a href="./electrical.html" class="expand"><i class="fa fa-search"></i><br>View More</a>
+                            <a class="close-overlay hidden">x</a>
+                          </div>
+                        </div>
+                      </div>
+                      <h2><i class="fa fa-plug"></i> Electrical Components</h2>
+                      <p>We purchased an Arduino Mega, which interfaces with 36 servos to play three octaves of keys.
+                      </p>
+                    </div>
                     <div class="col-md-4 wp4">
                       <div class="overlay-effect effects clearfix">
                         <div class="img">
@@ -179,34 +215,9 @@
                           </div>
                         </div>
                       </div>
-                      <h2>Mechanical</h2>
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ultricies nulla non metus pulvinar imperdiet. Praesent non adipiscing libero.</p>
-                    </div>
-                    <div class="col-md-4 wp4 delay-05s">
-                      <div class="overlay-effect effects clearfix">
-                        <div class="img">
-                          <img src="img/portfolio-02.jpg" alt="Portfolio Item">
-                          <div class="overlay">
-                            <a href="#" class="expand"><i class="fa fa-search"></i><br>View More</a>
-                            <a class="close-overlay hidden">x</a>
-                          </div>
-                        </div>
-                      </div>
-                      <h2>Electrical</h2>
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ultricies nulla non metus pulvinar imperdiet. Praesent non adipiscing libero.</p>
-                    </div>
-                    <div class="col-md-4 wp4 delay-1s">
-                      <div class="overlay-effect effects clearfix">
-                        <div class="img">
-                          <img src="img/portfolio-03.jpg" alt="Portfolio Item">
-                          <div class="overlay">
-                            <a href="#" class="expand"><i class="fa fa-search"></i><br>View More</a>
-                            <a class="close-overlay hidden">x</a>
-                          </div>
-                        </div>
-                      </div>
-                      <h2>Software</h2>
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ultricies nulla non metus pulvinar imperdiet. Praesent non adipiscing libero.</p>
+                      <h2><i class="fa fa-cogs"></i> Mechanical System</h2>
+                      <p>The mechanical system consists of mechanical “fingers” to press down on the keys 
+                      and a customized stand to hold all 54 servos in place over the centers of the keys. </p>
                     </div>
                   </li>
                 </ul>
@@ -229,6 +240,7 @@
             <div class="row">
               <div class="col-md-12">
                 <h1 class="arrow">We're a team that adore what we do</h1>
+                Meet the five students from Olin College class of 2017 who devoted a semester to designing and creating a piano-playing robot
               </div>
             </div>
             <div class="row">
@@ -252,24 +264,26 @@
                       <div class="col-md-4 wp5 delay-02s">
                         <img src="img/susie2.png" alt="Team Member">
                         <h2>Susie Grimshaw</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ultricies nulla non metus pulvinar imperdiet. Praesent non adipiscing libero.</p>
+                        <p>Susie is a design engineering student with a passion for engineering education. When she isn't working, you can find her playing music, spending time with friends, and dreaming about getting a puppy.</p>
                       </div>
                       <div class="col-md-4 wp5 delay-04s">
                         <img src="img/anne2.png" alt="Team Member">
                         <h2>Anne LoVerso</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ultricies nulla non metus pulvinar imperdiet. Praesent non adipiscing libero.</p>
-                        
+                        <p>Anne is an engineering with computing student, passionate about education and curricular design, circus arts, and making the world a better place.  Maybe that better world involves piano-playing robots.</p>
+                      </br>
+                      </br>
+                      </br>  
                       </div>
                       <div class="col-md-4 wp5 delay-06s">
                         <img src="img/lindseyv2.png" alt="Team Member">
                         <h2>Lindsey Vanderlyn</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ultricies nulla non metus pulvinar imperdiet. Praesent non adipiscing libero.</p>
+                        <p>Lindsey is an electrical and computer engineering student who loves to make things. In her free time (when she has it), she is doing homework because, let's be honest. Free time is a lie. </p>
                         
                       </div>
                       <div class="col-md-4 wp5 delay-08s">
                         <img src="img/sarah2.png" alt="Team Member">
                         <h2>Sarah Walters</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ultricies nulla non metus pulvinar imperdiet. Praesent non adipiscing libero.</p>
+                        <p>Sarah is a robotics engineering student who also happens to be a pianist and a violinist. If she's not engineering things or playing music, you'll probably find her reading sci-fi or fantasy or spending time with friends.</p>
                         
                       </div>
                     </li>
