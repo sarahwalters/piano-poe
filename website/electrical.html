@@ -65,10 +65,10 @@
                         <h1 class="arrow">A Look at Our Servos</h1>
                         <p>We purchased 38 <a href="http://www.hobbyking.com/hobbyking/store/__662__HXT900_9g_1_6kg_12sec_Micro_Servo.html">
                         Hextronik HXT900 servos from HobbyKing</a>.  Halfway through the project, we were waiting for the servos to ship, and 
-                        needed some immediately, so we bought 5 <a href="http://www.amazon.com/gp/product/B00CCZ2CRA/ref=od_aui_detailpages00?ie=UTF8&psc=1Hossen">Hossen SG90 servos from Amazon</a>.  These two brands of servos are very similar, being high-torque, very small motors.  
-                        The Hextronik servos have slightly more torque than the Hossen servos, although the difference is negligible for their key-pressing abilities.</p>
+                        needed some immediately, so we bought 5 <a href="http://www.amazon.com/gp/product/B00CCZ2CRA/ref=od_aui_detailpages00?ie=UTF8&psc=1Hossen">Hossen SG90 servos from Amazon</a>.  These two brands of servos are very similar, being high-torque, very small servo motors.  
+                        The Hextronik servos have slightly more torque than the Hossen servos, although for our purposes we found the difference to be negligible.</p>
 
-                        <p>We have 36 servos in our final deliverable, which span three octaves on the keyboard.</p>
+                        <p>The current system includes thirty-six servos, which span three octaves on the keyboard.</p>
                       </li>
                     </ul>
                   </div>
@@ -93,8 +93,9 @@
                     <ul class="slides">
                       <li>
                         <h1 class="arrow">Using the Arduino</h1>
-                        <p>To send the control signals to the motors, we use an Arduino Mega. We chose the Mega because it has both more SRAM memory and EEPROM memory, and more connections pins than the Arduino Uno we began prototyping with. The Mega sends out both the PWM control signal which changes the servo positions of each or our servos and the the power/ground.</p>
-                        <p>In order to power all 36 motors from the same power/ground we connect the wires to a protoboard, only connecting the PWM signal to each motor individually. This allows us to have cleaner wire management which is very important given the number of servos we are using in the project.</p>
+                        <p>To send the control signals to the motors, we use an Arduino Mega. We chose the Mega because it has more SRAM memory, more EEPROM memory, and more digital output pins than the Arduino Uno we began prototyping with. The Mega is powered via USB, and it provides power and ground to the protoboard and PWM control signals to each servo.</p>
+
+                        <p>In order to power all 36 motors from the same reference rails, we connect the power and ground wires for each servo to the rails on a breadboard-style protoboard. Then, we connect the digital output pins of the Arduino to each motor individually so we are able to use distinct PWM signals to control each.</p>
                       </li>
                       
                     </ul>
