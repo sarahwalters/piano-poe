@@ -41,9 +41,14 @@
             <div class="row">
               <div class="col-md-8 col-md-offset-2 wp1">
                 <h1 class="arrow">Software Overview</h1>
-                <p>When we were scoping our project, we were unsure of how well we would be able to use
-                computer vision to read sheet music accurately and robustly.  Therefore, we decided to consider
-                sheet music reading a stretch goal, and have the backup plan be reading notes from MIDI files.</p>
+                <p>We are able to process note input either from a MIDI file or from PDF sheet music and translate it into servo commands.
+
+                We are able to read music in two ways primarily because we were unsure when scoping our project how long it would take
+                to develop accurate music recognition software. As a result, we started by reading MIDI files, which are simple
+                sequences of different types of events. Having robust music reading early on in the project allowed us to test our electrical 
+                and mechanical systems. In parallel, we developed optical music recognition software which finds notes in images of 
+                sheet music, identifies their names, characterizes their durations, and constructs a sequence of note events similar to a MIDI file.
+                </p>
               </div>
             </div>
           </div>
@@ -65,16 +70,14 @@
                   <div id="servicesSlider">
                     <ul class="slides">
                       <li>
-                        <h1 class="arrow">Code System Diagram</h1>
-                        <p>Our code has two possible pipelines that reads music into notes playable by our Arduino, either
-                        using computer vision to find notes in an image file, or reading them from a MIDI file.</p>
-                        <p>MIDI files are format that carries musical information, and we were able to use a python library to
-                        unpack the information contained therein so we could reformat them for the Arduino.</p>
-                        <p>The sheet music reading uses computer vision and the OpenCV package for python to look through a
-                        full sheet of music for notes, and identify them.</p>
-                        <p>Both methods identify notes in a way that we can compile them into binary keyboard states.
-                        We represent each key as a binary digit, and at each timestep use the notes list to decide whether
-                        each key should be on or off.  These states are read by the Arduino to convert to discrete motor commands.</p>
+                        <h1 class="arrow">Python System Diagram</h1>
+                        <p>The diagram to the left depicts the two possible pipelines for converting music into sequences of notes: the
+                        MIDI file reading system and the optical music recognition software.</p>
+                        <p>A MIDI file is a format which contains musical information in the form of a sequence of note-on and note-off events. 
+                        We used a Python library to unpack the sequence of events.</p>
+                        <p>The optical music recognition uses computer vision via the OpenCV package for Python to find, identify, and characterize notes in a sheet of music.</p>
+                        <p>Once we have obtained a sequence of notes, we encode each distinct keyboard state as a
+                        binary string and store the time at which it should occur. Each bit of the string represents whether a specific key is depressed (1) or released (0). The Python system is then ready to transmit binary strings and times to the Arduino.</p>
                       </li>
                     </ul>
                   </div>
@@ -88,7 +91,7 @@
           <div class="container-fluid nopadding responsive-services3">
             <div class="wrapper">
               <div class="detailed2">
-                <img src="./img/staff_lines.png">
+                <img src="./img/midi.png">
               </div>
               <div class="fluid-white2"></div>
             </div>
@@ -98,8 +101,9 @@
                   <div id="servicesSlider2">
                     <ul class="slides">
                       <li>
+                        </br></br></br></br></br></br></br></br>
                         <h1 class="arrow">MIDI File Reading</h1>
-                        <p>SARAH WRITES HERE ABOUT HOW TO READ MIDI FILE</p>
+                        <p>MIDI files are a type of music file comprised of events. In this section of code, we use an open-source Python-MIDI library to open the file, identify note-on and note-off events, gather together the ones which occur simultaneously, and recognize the pitches. At that point, we are able to construct binary keyboard states for transmission to the Arduino.</p>
                       </li>
                       
                     </ul>
@@ -125,14 +129,69 @@
                     <ul class="slides">
                       <li>
                         <h1 class="arrow">Note Isolation Process</h1>
-                        <p>First, we convert a PDF of the sheet music into a PNG image file capable of being read by OpenCV in Python.
+                        <p>First, we convert a PDF of the sheet music into a PNG image file which OpenCV in Python is capable of reading.
                         Next, we search through the entire image and use the HoughLines algorithm to find and save the y-location of
-                        every staff line within the image (shown as the thick lines to the left)</p>
-                        <p>Next, we split the image into several images for each line of music, in the process destroying the staff lines and
-                        leaving only the notes behind.  Since we've saved the staff line locations, we will be able to identify notes still.</p>
+                        every staff line within the image (shown as the thick horizontal lines to the left)</p>
+                        <p>Next, we split the image into several images, each representing a single line of music. In the process we destroy the staff lines, leaving only the notes behind.  Since we saved the staff line locations, we are still able to identify notes.</p>
                         <img src="./img/single_line.png" width=500>
-                        <p>Next, we use a connectivity search by traversing a line of music column by column, checking if it contains any black
-                        pixels.  Columns that contain black pixels are cropped out and grouped together as note objects.</p>
+                        <p>Next, we use a connectivity search to traverse a line of music column by column, checking if it contains any black
+                        pixels.  We crop out columns that contain black pixels and group them together as note objects.</p>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services3">
+            <div class="wrapper">
+              <div class="detailed2">
+                <img src="./img/staff_lines.png">
+              </div>
+              <div class="fluid-white2"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-0">
+                  <div id="servicesSlider2">
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">Note Characterization and Identification</h1>
+                        <p>After we have eliminated whitespace columns and grouped note objects, we split each note object image in half along the horizontal line which separate the treble clef staff from the bass clef staff.</p>
+                        <p>We then send each half through a mean-shift algorithm which locates the center of mass of black pixels in the image, which we consider to be the center of the note.  This algorithm checks if the center is black or white to distinguish between half and quarter notes, and checks for the existence of a stem to distinguish between whole and half notes.  If it detects more than one note in the image (in a group of eighth notes), it breaks them apart and locates each center individually.</p>
+                        <p>We compare the location of the identified center of the note to the locations of the staff lines, saved during the isolation process, to identify which line or space corresponds to the note's vertical position.  With this, we have obtained the note name (C5, E4, B3...) and characterized the duration (half, quarter, ...).</p>
+                      </li>
+                      
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services3">
+            <div class="wrapper">
+              <div class="detailed">
+                <img src="./img/arduinodiagram.png">
+              </div>
+              <div class="fluid-white"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-7">
+                  <div>
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">Receiving and Playing Notes with Arduino</h1>
+                        <p>Once the Python environment has processed the note input, it sends a string representing a group of state/time pairs to the Arduino. The Arduino buffers the string until it receives an intermediate end character. When it receives the end character, it processes the string. Processing involves splitting each keyboard state and the corresponding time off, separating the keyboard state (a binary string) into byte-sized pieces and storing them to the EEPROM (the Arduino's byte memory), then pushing the associated time to a queue. The Arduino continues doing this until it receives the final end character, which indicates that Python is finished sending the entire song.
+                        </p>
+
+                        <p>Next, the Arduino transitions to the note playing state. First, it starts a clock so note timings will be consistent; then, it begins a loop that peeks at the next time in the queue until it is exceeded by the current time since start. At this point, it pops the time from the queue and reconstructs the corresponding keyboard state by retrieving bytes from the appropriate EEPROM addresses. It plays the keyboard state by looping through the string and positioning each servo accordingly. This process of checking and playing continues as long as there are still times left in the queue.</p>
 
                       </li>
                     </ul>
@@ -157,41 +216,13 @@
                   <div id="servicesSlider2">
                     <ul class="slides">
                       <li>
-                        <h1 class="arrow">Note Identification Process</h1>
-                        <p>After we have eliminated whitespace columns and group note objects, we have two notes, a left-handed note and a right-handed note, which we then split in half by cropping the image to get two separate notes.</p>
-                        <p>We then send each through a mean-shift algorithm which finds the 
-                        center of mass of black pixels in the image, which we consider to be the center of the note.  This algorithm checks if the center
-                        is black or white to distinguish between half and quarter notes, and checks for the existence of a stem to distinguish between
-                        whole and half notes.  If it detects more than one note in the image (in a group of eighth notes), it breaks them apart and finds each
-                        center individually.</p>
-                        <p>We compare the location of the center to the locations of the staff lines to find whether the note is on or between lines, and which ones.  From there, we have the note name (C5, E4, B3...) and the duration (half, quarter, ...).</p>
-                      </li>
-                      
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+                        <h1 class="arrow">Changes and Reflection</h1>
+                        <p>Overall, our project was well-scoped, especially for the strengths of our team.  The challenges we chose to embrace were primarily software-related, which matched the interests and skills of our team.  At the start of the project, we set a very realistic minimum software deliverable: we wanted to be able to use a MIDI file to control a single octave of notes. In addition, we set two stretch goals: more motors (from the software perspective, a trivial scaling problem) and the ability to use computer vision to read sheet music (a much more involved problem).</p>
 
-        <section class="text-center" id="responsive">
-          <div class="container-fluid nopadding responsive-services3">
-            <div class="wrapper">
-              <div class="detailed">
-                <img src="./img/arduinodiagram.png">
-              </div>
-              <div class="fluid-white"></div>
-            </div>
-            <div class="container designs">
-              <div class="row">
-                <div class="col-md-5 col-md-offset-7">
-                  <div id="servicesSlider">
-                    <ul class="slides">
-                      <li>
-                        <h1 class="arrow">Reading Note Input with Arduino</h1>
-                        <p>SARAH WRITES HERE ARDUINO STUFF</p>
+                        <p>Setting such a feasible minimum goal for the software system and breaking down the problem between multiple team members allowed us to be flexible. This became unexpectedly useful when we encountered the memory limit of our Arduino (and, subsequently, the request processing time involved in our serial communication) in an early version of the serial communication. These limitations forced us to rethink our infrastructure, which opened up several learning opportunities. Working with the memory limit and around the serial delay allowed us to explore in great depth the types of memory on an Arduino and the capabilities of each, and it prompted us to think about how to encode data compactly.</p>
 
+
+                        <p>We started out thinking about our system in the abstract, and as a result we built our software as several modular subsystems. This allowed us to move forward with the other subsystems individually, even when one took longer than expected. Thus, our goals remained largely the same through the project, with the minor change that at the end of the semester, we spent much of our time focusing on meeting our stretch goals.</p>
                       </li>
                     </ul>
                   </div>
@@ -200,7 +231,7 @@
             </div>
           </div>
         </section>
-
+        </br></br></br></br></br></br></br></br></br></br></br></br></br></br>
         <div class="ignite-cta text-center">
           <div class="container">
             <div class="row">
