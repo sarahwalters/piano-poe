@@ -40,7 +40,7 @@
             <div class="row">
               <div class="col-md-8 col-md-offset-2 wp1">
                 <h1 class="arrow">Electrical Overview</h1>
-                <p>Our electrical system consists primarily of 36 servos controlled by an Arduino Mega.  In order to power all of them, we break the actuators into groups of six, powering each group through a voltage regulator connected to 12 V source.   
+                <p>Our electrical system consists primarily of 36 servos controlled by an Arduino Mega.  They are powered in five groups, each one connected to a voltage regulator with a 9V power source.
                 </p>
               </div>
             </div>
@@ -64,7 +64,7 @@
                         <h1 class="arrow">Our servos and powering</h1>
                         <p>We purchased 38 <a href="http://www.hobbyking.com/hobbyking/store/__662__HXT900_9g_1_6kg_12sec_Micro_Servo.html">
                         Hextronik HXT900 servos from HobbyKing</a>.  Halfway through the project, we were waiting for the servos to ship, and 
-                        needed some immediately, so we bought 5 <a href="http://www.amazon.com/gp/product/B00CCZ2CRA/ref=od_aui_detailpages00?ie=UTF8&psc=1Hossen">Hossen SG90 servos from Amazon</a>.  These two brands of servos are very similar, being high-torque, very small servo motors.  
+                        needed some immediately, so we bought 5 <a href="http://www.amazon.com/gp/product/B00CCZ2CRA/ref=od_aui_detailpages00?ie=UTF8&psc=1Hossen">Hossen SG90 servos from Amazon</a>.  These two brands of servos are very similar: high-torque and equivalent dimensions.  
                         The Hextronik servos have slightly more torque than the Hossen servos, although for our purposes we found the difference to be negligible.</p>
 
                         <p>The current system includes thirty-six servos, which span three octaves on the keyboard.</p>
@@ -81,7 +81,7 @@
           <div class="container-fluid nopadding responsive-services">
             <div class="wrapper">
               <div class="detailed2">
-                <img src="./img/schematic.png">
+                <img src="./img/new_schematic4.png">
               </div>
               <div class="fluid-white2"></div>
             </div>
@@ -92,9 +92,10 @@
                     <ul class="slides">
                       <li>
                         <h1 class="arrow">Using the Arduino</h1>
-                        <p>To send the control signals to the motors, we use an Arduino Mega. We chose the Mega because it has more SRAM memory, more EEPROM memory, and more digital output pins than the Arduino Uno we began prototyping with. The Mega is powered via USB, and it provides power and ground to the protoboard and PWM control signals to each servo.</p>
+                        <p>To send the control signals to the motors, we used an Arduino Mega. We chose the Mega because it has more SRAM memory, more EEPROM memory, and more digital output pins than the Arduino Uno we began prototyping with. The Mega is powered via USB, and it provides PWM control signals to each servo.</p>
 
-                        <p>In order to power all 36 motors from the same reference rails, we connect the power and ground wires for each servo to the rails on a breadboard-style protoboard. Then, we connect the digital output pins of the Arduino to each motor individually so we are able to use distinct PWM signals to control each.</p>
+                        <p>We found that 36 servos were drawing too much current for the Arduino to power them all from the same rails.  We solved this problem by using voltage regulators, which connect to a 9V wall wart and pass 5V into the rails, to power a group of seven or eight servos.  The capacitors between the pins of the regulator prevent servo twitching.  Calculating how much current our motors draw allowed us to determine that we can power a maximum of eight servos per group. Then, we connected the digital output pins of the Arduino to each motor individually so we were able to use distinct PWM signals to control each servo.</p>
+                        <p>The diagram to the right reflects one of five power groups we created.</p>
                       </li>
                       
                     </ul>
@@ -105,6 +106,39 @@
           </div>
         </section>
 
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services">
+            <div class="wrapper">
+              <div class="detailed">
+                <img src="./img/servos.png">
+              </div>
+              <div class="fluid-white"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-7">
+                  <div id="servicesSlider">
+                    <ul class="slides">
+                      <li>
+                        <h1 class="arrow">Changes and Reflection</h1>
+                        <p>We had originally planned on soldering our servo connections to a protoboard instead
+                        of having them in a breadboard, and powering them simply from the Arduino 5V rails.
+                        However, after soldering, we found two problems interfering with the system: some of our
+                        solder joints had shorts, and our servos were drawing too much power from the Arduino.</p>
+
+                        <p>We solved these problems somewhat simultaneously: first by backtracking and deciding to stay
+                          with a solderless breadboard setup, and next by re-evaluating our power system.  We chose to use 5V
+                          voltage regulators to power groups of servos, in order to overcome the power problem.  The re-design
+                          of the electrical system was a whirlwind adventure in which we learned a lot about different types
+                          of power sources, electrical connections, and rapid prototyping.</p>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
