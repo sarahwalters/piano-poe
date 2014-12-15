@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PianoBot</title>
+    <title>PianoBot - Mechanical</title>
     <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
@@ -26,7 +26,7 @@
           <div class="container">
             <div class="row">
               <div class="col-md-8 col-md-offset-2">
-                <h1>Mechanical System></h1>
+                <h1>Mechanical System</h1>
                 <a href="./index.html" class="down-arrow-btn"><i class="fa fa-chevron-left"></i></a>
               </div>
             </div>
@@ -40,7 +40,7 @@
             <div class="row">
               <div class="col-md-8 col-md-offset-2 wp1">
                 <h1 class="arrow">Mechanical Overview</h1>
-                <p> In our mechanical system, we wanted a solid, reliable mechanical system, valuing these goals over flash and complexity. Thus we designed a modular system which utilizes a series of human inspired 'fingers' to depress keys on a keyboard. The fingers themselves are connected together in an offset pattern so that the servos can be placed close enough to play three octaves worth of notes, including sharps and flats, and created of simple, easily replaced components. Designing our system in this manner also allowed us to easily scale our system form one to three octaves and if we had had more servos, would have allowed us to expand farther. </p>
+                <p>Our mechanical system values solid, reliable structure that fulfilled our goals of playing three octaves over flash and unnecessary complexity.  We utilize a series of human-inspired fingers to press keys on the keyboard.  We connected the fingers in an offset pattern, so that we can place the servos close enough together to play three octaves of notes, including sharps and flats.  The mechanism is built from simple, easily replaced components, which allowed easy scaling from one to three octaves, and opens the possibility of including more in the future.</p>
               </div>
             </div>
           </div>
@@ -49,8 +49,8 @@
         <section class="text-center" id="responsive">
           <div class="container-fluid nopadding responsive-services">
             <div class="wrapper">
-              <div class="iphone">
-                <div class="wp3"></div>
+              <div class="detailed">
+                <img src="./img/staff_lines.png">
               </div>
               <div class="fluid-white"></div>
             </div>
@@ -60,9 +60,9 @@
                   <div id="servicesSlider">
                     <ul class="slides">
                       <li>
-                        <h1 class="arrow">Key Design Choices</h1>
+                        <h1 class="arrow">Detailed Description</h1>
                         <p>
-                          Our main challenge was fitting the servos close enough together that we are able to play keys adjacent to one another on the keyboard. In order to solve this, we quickly realized that we would have to offset our servos because the width of their casing was too wide. For a single octave, this problem is not too challenging, and can be solved with a single v shape. Adding more octaves, however was more challenging. In order to prevent creating precariously long arms, we had to expand past a single V and redesign some of the arms so that they would be able to pass over servos closer to the piano.
+                          As shown in the CAD to the left, our mechanical system is made up of a series of servos on a V-shaped mount, each with an arm customized for its position relative to the keyboard.  We did calculations to ensure that the arms would strike the keys at approximately the same velocity.  The arms and servo mount are made of laser-cut MDF, and the arms have felt glued onto their heads to protect the keys.  The arms are epoxied to the plastic servo attachments.  Finally, the servos are screwed into place on the servo mount.  We designed a free-standing servo mount to be placed in front of a keyboard or piano.  We made this decision because we wanted to prevent any kind of damage to the keyboard, as per our design goals.  Instead, we re-designed the mount so that it is self-supporting and does not need to be held up in any manner when it is playing.
                         </p>
                       </li>
                       
@@ -77,8 +77,8 @@
         <section class="text-center" id="responsive">
           <div class="container-fluid nopadding responsive-services">
             <div class="wrapper">
-              <div class="iphone2">
-                <div class="wp3"></div>
+              <div class="detailed2">
+                <img src="./img/staff_lines.png">
               </div>
               <div class="fluid-white2"></div>
             </div>
@@ -88,12 +88,40 @@
                   <div id="servicesSlider2">
                     <ul class="slides">
                       <li>
+                        <h1 class="arrow">Key Design Choices</h1>
+                        <p>
+                          Our main challenge was fitting the servos close enough together that we are able to play keys adjacent to one another on the keyboard. To solve this, we quickly realized that we would have to offset our servos because the width of their casing was too wide. For a single octave, this problem is not too challenging, and can be solved with a single V-shaped arrangement. Adding more octaves, however was more challenging. Our gut instinct was to keep a single V-shaped arrangement, only much larger.  However, this presents the concern of creating precariously long arms.  We re-considered the design to expand past a single V-shape and redesigned some of the arms so that they would be able to pass over other servos closer to the piano.
+                        </p>
+                      </li>
+                      
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-center" id="responsive">
+          <div class="container-fluid nopadding responsive-services">
+            <div class="wrapper">
+              <div class="detailed">
+                <img src="./img/staff_lines.png">
+              </div>
+              <div class="fluid-white"></div>
+            </div>
+            <div class="container designs">
+              <div class="row">
+                <div class="col-md-5 col-md-offset-7">
+                  <div id="servicesSlider">
+                    <ul class="slides">
+                      <li>
                         <h1 class="arrow">Changes and Reflections</h1>
                         <p>
-                          Over the course of this project, the design for our mechanical system is what changed the most. When we started, we were very interested in making use a mechanical system called a reciprocating rectilinear which converts continuous rotational motion to bi-directional linear motion. However, after investing a considerable amount of time into this system we realized that the cost in time of making them as well as the difficulty of getting the tolerances correct was higher than we wanted to invest. 
+                          Over the course of this project, the design for our mechanical system is what changed the most. When we started, we were very interested in making use a mechanical system called a reciprocating rectilinear actuator, which converts continuous rotational motion to bi-directional linear motion. However, after investing a some time into this designing this system, we found that they would only work if we spent a significant amount of tedious time making sure the tolerances were perfect on the gears.  We decided to re-design into using arms, to get the precise position control offered by servos.
                         </p>
                         <p>
-                          With this decision, we reevaluated our goals for the mechanical system and determined that we valued reliability at that point over a more technically flashy system. This decision, which came reasonably early in the project, allowed us to make our system significantly simpler, more modular, and more easily replicated. All of these factors allowed us not only to meet our minimum deliverable - a system capapble of playing a single octave in the key of C - but to expand to play more than three times as many notes.
+                          With this decision, we reevaluated our goals for the mechanical system and determined that we valued reliability at that point over a more technically flashy system. This decision, which came reasonably early in the project, allowed us to make our system significantly simpler, more modular, and more easily replicated. All of these factors allowed us not only to meet our minimum deliverable - a system capapble of playing a single octave in the key of C major - but to expand to play more than three times as many notes.
                         </p>
                       </li>
                       
