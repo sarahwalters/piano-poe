@@ -19,8 +19,8 @@ float speedFactor = 3.75;
 // ...servos
 Servo sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4;
 Servo servos[12] = {sC4, sCsh4, sD4, sDsh4, sE4, sF4, sFsh4, sG4, sGsh4, sA4, sAsh4, sB4}; // in pin order, starting at 2
-int offPos[12] = {28, 0, 16, 0, 22, 11, 180, 169, 180, 163, 180, 130};
-int onPos[12] = {15, 0, 5, 0, 10, 0, 180, 180, 180, 174, 180, 148};
+int offPos[12] = {24, 0, 16, 0, 22, 11, 180, 169, 180, 163, 180, 130};
+int onPos[12] = {4, 0, 5, 0, 10, 0, 180, 180, 180, 174, 180, 148};
 // 160, 173
 int numServos = 12;
 
