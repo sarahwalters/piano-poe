@@ -22,7 +22,6 @@ piano-poe
 
 #### Note library:
 * Pull the Note folder from this git repo
-* 
 * Save files in the Note folder from this repo into arduino/libraries/Note (that is, /usr/share/arduino/libraries)
 * After restarting your Arduino environment, be sure you can #include <Note.h>
 
